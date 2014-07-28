@@ -5,7 +5,7 @@ demonstrate the language, standard libraries, and tools.
 
 ## The examples
 
-### [hello](hello/) and [stringutil](stringutil/)
+### [hello](hello/) ([godoc](//godoc.org/github.com/golang/example/hello)) and [stringutil](stringutil/) ([godoc](//godoc.org/github.com/golang/example/stringutil))
 
     go get github.com/golang/example/hello
 
@@ -23,7 +23,7 @@ Library [stringutil](stringutil/) covers:
 * Conversion between string and []rune
 * Table-driven unit tests ([testing](//golang.org/pkg/testing/))
 
-### [outyet](outyet/)
+### [outyet](outyet/) ([godoc](//godoc.org/github.com/golang/example/outyet))
 
     go get github.com/golang/example/outyet
 
