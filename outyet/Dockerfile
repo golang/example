@@ -1,2 +1,2 @@
-FROM golang:1-onbuild
+FROM golang:onbuild
 EXPOSE 8080
