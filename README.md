@@ -42,3 +42,11 @@ Topics covered:
 * Dependency injection
 * Time ([time](//golang.org/pkg/time/))
 
+### [appengine-hello](appengine-hello/) ([godoc](//godoc.org/github.com/golang/example/appengine-hello))
+
+	goapp get github.com/golang/example/appengine-hello
+
+A trivial "Hello, world" App Engine application intended to be used as the
+starting point for your own code.
+
+_Note_: The `goapp` tool is part of the [Google App Engine SDK for Go](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Go).
