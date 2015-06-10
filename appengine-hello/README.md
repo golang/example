@@ -2,8 +2,8 @@ This code is a starting point for your Google App Engine application in
 Go.
 
 To run the application locally you need the install the [Go Cloud
-SDK](https://cloud.google.com/sdk/) and execute the next command from
-the directory containing this file:
+SDK](https://cloud.google.com/appengine/docs/go/#Go_tools) and execute the next
+command from the directory containing this file:
 
     $ goapp serve app.yaml
 
