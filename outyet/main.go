@@ -36,7 +36,7 @@ var (
 	version    = flag.String("version", "1.4", "Go version")
 )
 
-const baseChangeURL = "https://code.google.com/p/go/source/detail?r="
+const baseChangeURL = "https://go.googlesource.com/go/+/"
 
 func main() {
 	flag.Parse()
