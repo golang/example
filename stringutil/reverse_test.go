@@ -16,7 +16,11 @@ limitations under the License.
 
 package stringutil
 
-import "testing"
+import (
+	"fmt"
+	"github.com/golang/example/stringutil"
+	"testing"
+)
 
 func TestReverse(t *testing.T) {
 	for _, c := range []struct {
@@ -31,4 +35,16 @@ func TestReverse(t *testing.T) {
 			t.Errorf("Reverse(%q) == %q, want %q", c.in, got, c.want)
 		}
 	}
+}
+
+func ExampleReverse() {
+	r := stringutil.Reverse("Hello, world")
+	fmt.Println(r)
+
+	r = stringutil.Reverse("Hello, 世界")
+	fmt.Println(r)
+
+	// Output:
+	// dlrow ,olleH
+	// 界世 ,olleH
 }

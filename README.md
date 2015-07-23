@@ -22,6 +22,7 @@ Library [stringutil](stringutil/) covers:
 * The basic form of a library
 * Conversion between string and []rune
 * Table-driven unit tests ([testing](//golang.org/pkg/testing/))
+* Testable examples
 
 ### [outyet](outyet/) ([godoc](//godoc.org/github.com/golang/example/outyet))
 
