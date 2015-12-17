@@ -318,7 +318,7 @@ The `Id` method will be explained in [Ids](#ids).
 
 Not all methods make sense for each kind of object.  For instance,
 the last four kinds above have no meaningful `Type` method.
-And some kinds of object have methods in addition to those required by the
+And some kinds of objects have methods in addition to those required by the
 `Object` interface:
 
 
@@ -704,7 +704,7 @@ the set of comments to get a better feel for how name resolution works.
 
 
 
-The table below summarizes which kinds of object may be declared at
+The table below summarizes which kinds of objects may be declared at
 each level of the tree of lexical blocks.
 
 
@@ -773,7 +773,6 @@ order among them is not specified.
 That is, any topological order of the import graph will do.
 The `(*Package).Imports` method returns the set of direct
 dependencies of a package.
->>>>>>> 637ffe0981073879a95f848fd9528efe9231bed9
 
 
 # Types
