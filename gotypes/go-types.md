@@ -148,7 +148,7 @@ instance---must have access to the `FileSet`.
 
 Second, the program parses the input string.
 More realistic packages contain several source files, so the parsing
-step must be repeated for each one, or better still, done in parallel.
+step must be repeated for each one, or better, done in parallel.
 Third, it creates a `Config` that specifies type-checking options.
 Since the _hello, world_ program uses imports, we must indicate
 how to locate the imported packages.
@@ -221,11 +221,11 @@ object-oriented programming.)
 
 
 
-Objects are represented by the `Object` interface, shown below:
+Objects are represented by the `Object` interface:
 
 
 	type Object interface {
-	    Name() string   // package local object name
+	    Name() string   // package-local object name
 	    Exported() bool // reports whether the name starts with a capital letter
 	    Type() Type     // object type
 	    Pos() token.Pos // position of object identifier in declaration
@@ -255,7 +255,7 @@ individual fields for the file name, line number, column, and byte
 offset, though usually we just call its `String` method:
 
 
-	fmt.Fprintln(fset.Position(obj.Pos())) // "hello.go:10:6"
+	fmt.Println(fset.Position(obj.Pos())) // "hello.go:10:6"
 
 
 Not all objects carry position information.
@@ -266,7 +266,7 @@ imported from such a file returns zero, also known as
 
 
 
-There are eight kinds of objects in the Go type checker.
+There are eight kinds of object in the Go type checker.
 Most familiar are the kinds that can be declared at package level:
 constants, variables, functions, and types.
 Less familiar are statement labels, imported package names
@@ -305,6 +305,7 @@ which the object was declared; we'll come back to this in
 [Scopes](#scopes).
 Fields and methods are not found in the lexical environment, so
 their objects have no `Parent`.
+<!-- TODO check this -->
 
 
 
@@ -578,8 +579,8 @@ The structure of the lexical environment thus forms a tree, with the
 universe block at the root, the package blocks beneath it, the file
 blocks beneath them, and then any number of local blocks beneath the
 files.
-The following methods of `Scope` make this tree structure
-accessible and navigable:
+We can access and navigate this tree structure with the following
+methods of `Scope`:
 
 
 	func (s *Scope) Parent() *Scope
@@ -644,7 +645,7 @@ before or after that point.
 
 
 `Pos` and `End` report the `Scope`'s start and end
-position which, for explicit blocks, are coincident with its curly
+position which, for explicit blocks, coincide with its curly
 braces.
 `Contains` is a convenience method that reports whether a
 position lies in this interval.
@@ -717,6 +718,7 @@ each level of the tree of lexical blocks.
     PkgName               ✔
     Label                              ✔
 
+
 # Initialization Order
 
 
@@ -770,7 +772,8 @@ Across packages, dependencies must be initialized first, although the
 order among them is not specified.
 That is, any topological order of the import graph will do.
 The `(*Package).Imports` method returns the set of direct
-dependencies of a package, in an unspecified order.
+dependencies of a package.
+>>>>>>> 637ffe0981073879a95f848fd9528efe9231bed9
 
 
 # Types
@@ -885,7 +888,7 @@ for expressions containing errors, or for objects without types, like
 The `Name` method returns the name of the type, such as
 `"float64"`, and the `Info` method returns a bitfield that
 encodes information about the type, such as whether it is signed or
-unsigned, integer or floating point, real or complex.
+unsigned, integer or floating point, or real or complex.
 
 
 
@@ -954,6 +957,7 @@ ordered list of field tags.
 Each field is a `Var` object whose `IsField` method returns true.
 Field objects have no `Parent` scope, because they are
 resolved through selections, not through the lexical environment.
+<!-- TODO check this -->
 
 
 
@@ -991,7 +995,7 @@ and to `U`, and short of inspecting source positions or walking
 the AST---neither of which is possible for objects loaded from compiler
 export data---it is not possible to ascertain that `x` was declared as
 part of `T`.
-The type checker computes the exact same data structures given this input:
+The type checker builds the exact same data structures given this input:
 
 
 	type T U
@@ -1083,7 +1087,7 @@ These types are recorded during type checking for later use
 A type declaration creates a `TypeName` object, and the type of
 that object is a `Named`.
 These two entities, an object and a type, are distinct but closely
-related, and they exist in one-to-one correpondence.
+related, and they exist in one-to-one correspondence.
 
 
 	type Named struct{ ... }
@@ -1224,15 +1228,15 @@ of the `Info` struct, namely `Types`:
 	}
 
 
-No entry is recorded for identifiers since the `Defs` and
+No entries are recorded for identifiers since the `Defs` and
 `Uses` maps provide more information about them.
-Also, no entry is recorded for pseudo-expressions like
+Also, no entries are recorded for pseudo-expressions like
 `*ast.KeyValuePair` or `*ast.Ellipsis`.
 
 
 
 The value of the `Types` map is a `TypeAndValue`, which
-(unsurprisingly) holds the `Type` and value of the expression, and in
+(unsurprisingly) holds the type and value of the expression, and in
 addition, its _mode_.
 The mode is opaque, but has predicates to answer questions such as:
 Does this expression denote a value or a type?  Does this value have an
@@ -1256,7 +1260,7 @@ satisfy each predicate.
 	func (TypeAndValue) IsNil() bool       // e.g. "nil"
 	func (TypeAndValue) Addressable() bool // e.g. "a[i]" but not "f()", "m[key]"
 	func (TypeAndValue) Assignable() bool  // e.g. "a[i]", "m[key]"
-	func (TypeAndValue) HasOk() bool       // e.g. "&lt;-ch", "m[key]"
+	func (TypeAndValue) HasOk() bool       // e.g. "<-ch", "m[key]"
 
 
 The statement below inspects every expression within the AST of a single
@@ -1408,12 +1412,9 @@ and `Indirect`.
 
 The `addressable` flag should be set if the receiver is a
 _variable_ of type `T`, since in a method selection on a
-variable, an implicit address-of operation (`&amp;`) may occur.
+variable, an implicit address-of operation (`&`) may occur.
 The flag indicates whether the methods of type `*T` should be
 considered during the lookup.
-
-
-
 (You may wonder why this parameter is necessary.  Couldn't clients
 instead call `LookupFieldOrMethod` on the pointer type `*T`
 if the receiver is a `T` variable?  The answer is that if
@@ -1527,7 +1528,7 @@ Clients can request the method set of a type `T` by calling
 	func (s *MethodSet) Lookup(pkg *Package, name string) *Selection
 
 
-The `Len` and `At` methods access a a list of
+The `Len` and `At` methods access a list of
 `Selections`, all of kind `MethodVal`, ordered by `Id`.
 The `Lookup` function allows lookup of a single method by
 name (and package path, as explained in the previous section).
@@ -1687,7 +1688,7 @@ and for constructing new values:
 
 
 All numeric `Value`s, whether integer or floating-point, signed or
-unsigned, or real or complex, are represented more precisely than the
+unsigned, or real or complex, are represented more precisely than
 ordinary Go types like `int64` and `float64`.
 Internally, the `go/constant` package uses multi-precision data types
 like `Int`, `Rat`, and `Float` from the `math/big` package so that
