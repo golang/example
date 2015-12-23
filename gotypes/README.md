@@ -321,7 +321,7 @@ Objects are represented by the `Object` interface:
 
 The first four methods are straightforward; we'll explain the other
 three later.
-`Name` returns the objects's name---an identifier.
+`Name` returns the object's name---an identifier.
 `Exported` is a convenience method that reports whether the first
 letter of `Name` is a capital, indicating that the object may be
 visible from outside the package.
@@ -1086,7 +1086,7 @@ named types for the purposes of assignability, even though the type
 checker does not represent them using `Named`.
 And `unsafe.Pointer` is a pointer type for the purpose of
 determining whether the receiver type of a method is legal, even
-though the type checker does not represet it using `Pointer`.
+though the type checker does not represent it using `Pointer`.
 
 
 
@@ -1151,7 +1151,7 @@ An anonymous field is represented like a regular field, but its
 
 
 
-One subtlety is relevent to tools that generate documentation.
+One subtlety is relevant to tools that generate documentation.
 When analyzing a declaration such as this,
 
 
@@ -1377,7 +1377,7 @@ satisfaction:
 	func MissingMethod(V Type, T *Interface, static bool) (method *Func, wrongType bool)
 
 
-The `Implements` predicate reports whether a type satisifies an
+The `Implements` predicate reports whether a type satisfies an
 interface type.
 `MissingMethod` is like `Implements`, but instead of
 returning false, it explains why a type does not satisfy the
@@ -1737,7 +1737,7 @@ is a subtle consequence of the
 section in the Go spec: "Two
 identifiers are different if they are spelled differently, or if they
 appear in different packages and are not exported."
-In practical terms, this means that a type may have have two methods
+In practical terms, this means that a type may have two methods
 (or two fields, or one of each) both named `f` so long as those
 methods are defined in different packages, as in this example:
 
@@ -1843,7 +1843,7 @@ If you only need a single method, don't construct the
 
 
 The next program generates a boilerplate
-declaration of a new concrete type that satisifies an existing
+declaration of a new concrete type that satisfies an existing
 interface.
 Here's an example:
 
