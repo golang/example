@@ -266,7 +266,7 @@ imported from such a file returns zero, also known as
 
 
 
-There are eight kinds of object in the Go type checker.
+There are eight kinds of objects in the Go type checker.
 Most familiar are the kinds that can be declared at package level:
 constants, variables, functions, and types.
 Less familiar are statement labels, imported package names
