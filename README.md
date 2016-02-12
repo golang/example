@@ -50,3 +50,8 @@ A trivial "Hello, world" App Engine application intended to be used as the
 starting point for your own code.
 
 _Note_: The `goapp` tool is part of the [Google App Engine SDK for Go](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Go).
+
+### [template][template/] ([godoc](//godoc.org/github.com/golang/example/template))
+
+A trivial web server that demonstrates the use of the
+[`template` package](https://golang.org/pkg/text/template/)'s `block` feature.
