@@ -15,6 +15,7 @@ This document is maintained by Alan Donovan `adonovan@google.com`.
 
 The [`go/types` package]('https://golang.org/pkg/go/types) is a
 type-checker for Go programs, designed by Robert Griesemer.
+It became part of Go's standard library in Go 1.5.
 Measured by lines of code and by API surface area, it is one of the
 most complex packages in Go's standard library, and using it requires
 a firm grasp of the structure of Go programs.
@@ -23,16 +24,6 @@ It comes with several example programs that you can obtain with `go get` and pla
 We assume you are a proficient Go programmer who wants to build tools
 to analyze or manipulate Go programs and that you have some knowledge
 of how a typical compiler works.
-
-
-
-The `go/types` package became part of Go's standard library in Go 1.5.
-Prior to that, it was located at
-[`golang.org/x/tools/go/types`](https://godoc.org/golang.org/x/tools/go/types),
-though that package will be deleted one month after the release
-of Go 1.6 in early 2016.
-
-
 
 The type checker complements several existing
 standard packages for analyzing Go programs.
@@ -69,10 +60,6 @@ from the `x/tools` repository is a client of the type
 checker that loads, parses, and type-checks a complete Go program from
 source code.
 We use it in some of our examples and you may find it useful too.
-(Please note that until March 2016, the
-`golang.org/x/tools/...` packages will continue to depend on the
-old `golang.org/x/tools/go/types` package, not on the
-new standard `go/types` package.  The two are almost identical.)
 
 
 

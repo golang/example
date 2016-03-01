@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"go/types"
 	"log"
 
 	"golang.org/x/tools/go/loader"
-	"golang.org/x/tools/go/types" // TODO: will use std go/types after Mar 2016
 )
 
 //!+

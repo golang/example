@@ -12,6 +12,7 @@ package main
 
 import (
 	"fmt"
+	"go/types"
 	"log"
 	"os"
 	"strings"
@@ -19,7 +20,6 @@ import (
 	"unicode/utf8"
 
 	"golang.org/x/tools/go/loader"
-	"golang.org/x/tools/go/types" // TODO: will use std go/types after Feb 2016
 )
 
 const usage = "Usage: skeleton <package> <interface> <concrete>"
