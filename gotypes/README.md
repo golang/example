@@ -274,7 +274,7 @@ which provides access to all the named entities or
 [_objects_](#objects) declared at package level.
 `Imports` returns the set of packages directly imported by this
 one, and  may be useful for computing dependencies
-([Initialization Order](#initialization_order)).
+([Initialization Order](#initialization-order)).
 
 
 
@@ -1275,7 +1275,7 @@ methods associated with this `Named` type (or a pointer to it),
 in the order they were declared.
 However, due to the subtleties of anonymous fields and the difference
 between value and pointer receivers, a named type may have more or fewer
-methods than this list.  We'll return to this in [Method Sets](#method_sets).
+methods than this list.  We'll return to this in [Method Sets](#method-sets).
 
 
 
@@ -2507,7 +2507,7 @@ mapping between declarations and objects.
 
 To map **from an `ast.Ident` to the `Object`** it refers to (or
 declares), consult the `Uses` or `Defs` map for the
-package, as shown in [Identifier Resolution](#identifier_resolution).
+package, as shown in [Identifier Resolution](#identifier-resolution).
 
 
 
