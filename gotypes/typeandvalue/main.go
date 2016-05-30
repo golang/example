@@ -104,7 +104,11 @@ make                            mode:  builtin
                                 type:  func(map[string]int) map[string]int
 map[string]int                  mode:  type
                                 type:  map[string]int
-m["hello"]                      mode:  value,assignable,ok
+string                          mode:  type
+                                type:  string
+int                             mode:  type
+                                type:  int
+m["hello, "+"world"]            mode:  value,assignable,ok
                                 type:  (int, bool)
 m                               mode:  value,addressable,assignable
                                 type:  map[string]int
