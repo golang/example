@@ -51,6 +51,13 @@ starting point for your own code.
 
 _Note_: The `goapp` tool is part of the [Google App Engine SDK for Go](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Go).
 
+### [gotypes](gotypes/) ([godoc](//godoc.org/github.com/golang/example/gotypes))
+
+The go/types package is a type-checker for Go programs, designed by Robert Griesemer.
+It became part of Go's standard library in Go 1.5. Measured by lines of code and by API surface area,
+it is one of the most complex packages in Go's standard library,
+and using it requires a firm grasp of the structure of Go programs.
+
 ### [template](template/) ([godoc](//godoc.org/github.com/golang/example/template))
 
 A trivial web server that demonstrates the use of the
