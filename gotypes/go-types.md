@@ -313,7 +313,7 @@ And some kinds of objects have methods in addition to those required by the
 	func (*Var) Anonymous() bool
 	func (*Var) IsField() bool
 	func (*Const) Val() constant.Value
-	func (*TypeName) IsAlias() bool // expected in Go 1.9
+	func (*TypeName) IsAlias() bool
 	func (*PkgName) Imported() *Package
 
 
@@ -326,7 +326,7 @@ the one in `struct{T T}` from anonymous fields like the one in `struct{T}`.
 `(*Const).Val` returns the value of a named [constant](#constants).
 
 
-`(*TypeName).IsAlias`, to be introduced in Go 1.9, reports whether the
+`(*TypeName).IsAlias`, introduced in Go 1.9, reports whether the
 type name is simply an alias for a type (as in `type I = int`),
 as opposed to a definition of a [`Named`](#named-types) type, as
 in `type Celsius float64`.
@@ -1077,7 +1077,7 @@ These types are recorded during type checking for later use
 
 
 Type declarations come in two forms.
-The simplest kind, to be introduced in Go 1.9,
+The simplest kind, introduced in Go 1.9,
 merely declares a (possibly alternative) name for an existing type.
 Type names used in this way are informally called _type aliases_.
 For example, this declaration lets you use the type
