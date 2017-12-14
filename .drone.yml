@@ -1,0 +1,10 @@
+---
+pipeline:
+  build:
+    image: golang
+    commands:
+      - cd outyet
+      - go get
+      - go build
+      - go test
+
