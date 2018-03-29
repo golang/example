@@ -25,3 +25,7 @@ func Reverse(s string) string {
 	}
 	return string(r)
 }
+
+func test() string{
+	return "test"
+}
