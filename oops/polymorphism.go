@@ -1,3 +1,4 @@
+//polymorphism
 package main 
 import "fmt"
 type income interface {
