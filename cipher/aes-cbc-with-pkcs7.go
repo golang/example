@@ -60,10 +60,10 @@ func aesDecrypter(cipherText, key []byte) []byte {
 }
 
 func main() {
-	// 128bit key
-	key, _ := hex.DecodeString("6368616e676520746869732070617373")
 	// 256bit key
 	// key, _ := hex.DecodeString("6368616e6765207468697320706173736368616e676520746869732070617373")
+	// 128bit key
+	key, _ := hex.DecodeString("6368616e676520746869732070617373")
 	plainText := []byte("this is an example of aes-cbc-with-pkcs7")
 	cipherText := aesEncrypter(plainText, key)
 	fmt.Printf("%x\n", cipherText)
