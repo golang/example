@@ -3,6 +3,27 @@
 This repository contains a collection of Go programs and libraries that
 demonstrate the language, standard libraries, and tools.
 
+## Requirements
+
+[Golang 1.16 comes with better support for modules](https://blog.golang.org/go116-module-changes) which could case fresh installations of Golang to fail when using the underneath examples.
+
+An failing example could look like this:
+
+```sh
+go get -v -u github.com/golang/example/hello
+
+go get: github.com/golang/example@none updating to
+        github.com/golang/example@v0.0.0-20210113200257-bcf50bfd7dcd: parsing go.mod:
+        module declares its path as: golang.org/x/example
+                but was required as: github.com/golang/example
+```
+
+For that please make sure to configure your Golang module behaviour with following command:
+
+```sh
+go env -w GO111MODULE=auto
+```
+
 ## The examples
 
 ### [hello](hello/) ([godoc](//godoc.org/github.com/golang/example/hello)) and [stringutil](stringutil/) ([godoc](//godoc.org/github.com/golang/example/stringutil))
