@@ -77,7 +77,7 @@ func main() {
 
 			// Show caption unless '-' follows.
 			if len(words) < 4 || words[3] != "-" {
-				fmt.Printf("	// go get github.com/golang/example/gotypes/%s\n\n",
+				fmt.Printf("	// go get golang.org/x/example/gotypes/%s\n\n",
 					filepath.Dir(filename))
 			}
 

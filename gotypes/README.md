@@ -78,7 +78,7 @@ constant expressions, as we'll see in
 
 
 
-The [`golang.org/x/tools/go/loader` package](https://godoc.org/golang.org/x/tools/go/loader)
+The [`golang.org/x/tools/go/loader` package](https://pkg.go.dev/golang.org/x/tools/go/loader)
 from the `x/tools` repository is a client of the type
 checker that loads, parses, and type-checks a complete Go program from
 source code.
@@ -133,10 +133,10 @@ the _hello, world_ program, supplied as a string.
 Later examples will be variations on this one, and we'll often omit
 boilerplate details such as parsing.
 To check out and build the examples,
-run `go get github.com/golang/example/gotypes/...`.
+run `go get golang.org/x/example/gotypes/...`.
 
 
-	// go get github.com/golang/example/gotypes/pkginfo
+	// go get golang.org/x/example/gotypes/pkginfo
 
 ```
 package main
@@ -243,7 +243,7 @@ Finally, the program prints the attributes of the package, shown below.
 
 
 ```
-$ go build github.com/golang/example/gotypes/pkginfo
+$ go build golang.org/x/example/gotypes/pkginfo
 $ ./pkginfo
 Package  "cmd/hello"
 Name:    main
@@ -492,7 +492,7 @@ The function below prints the location of each referring and defining
 identifier in the input program, and the object it refers to.
 
 
-	// go get github.com/golang/example/gotypes/defsuses
+	// go get golang.org/x/example/gotypes/defsuses
 
 ```
 func PrintDefsUses(fset *token.FileSet, files ...*ast.File) error {
@@ -522,7 +522,7 @@ func PrintDefsUses(fset *token.FileSet, files ...*ast.File) error {
 Let's use the _hello, world_ program again as the input:
 
 
-	// go get github.com/golang/example/gotypes/hello
+	// go get golang.org/x/example/gotypes/hello
 
 ```
 package main
@@ -539,7 +539,7 @@ This is what it prints:
 
 
 ```
-$ go build github.com/golang/example/gotypes/defsuses
+$ go build golang.org/x/example/gotypes/defsuses
 $ ./defsuses
 hello.go:1:9: "main" defines <nil>
 hello.go:5:6: "main" defines func hello.main()
@@ -783,7 +783,7 @@ Observe that the `ParseComments` flag directs the parser to
 preserve comments in the input.
 
 
-	// go get github.com/golang/example/gotypes/lookup
+	// go get golang.org/x/example/gotypes/lookup
 
 ```
 func main() {
@@ -853,7 +853,7 @@ Here's the output:
 
 
 ```
-$ go build github.com/golang/example/gotypes/lookup
+$ go build golang.org/x/example/gotypes/lookup
 $ ./lookup
 At hello.go:6:1,        "append" = builtin append
 At hello.go:8:9,        "fmt" = package fmt
@@ -1467,7 +1467,7 @@ The statement below inspects every expression within the AST of a single
 type-checked file and prints its type, value, and mode:
 
 
-	// go get github.com/golang/example/gotypes/typeandvalue
+	// go get golang.org/x/example/gotypes/typeandvalue
 
 ```
 // f is a parsed, type-checked *ast.File.
@@ -1517,7 +1517,7 @@ the program prints:
 
 
 ```
-$ go build github.com/golang/example/gotypes/typeandvalue
+$ go build golang.org/x/example/gotypes/typeandvalue
 $ ./typeandvalue
 make(map[string]int)            mode:  value
                                 type:  map[string]int
@@ -1573,7 +1573,7 @@ call `x.f()` was intended;
 comparing a method `x.f` against nil is a common mistake.
 
 
-	// go get github.com/golang/example/gotypes/nilfunc
+	// go get golang.org/x/example/gotypes/nilfunc
 
 ```
 // CheckNilFuncComparison reports unintended comparisons
@@ -1640,7 +1640,7 @@ the program reports these errors:
 
 
 ```
-$ go build github.com/golang/example/gotypes/nilfunc
+$ go build golang.org/x/example/gotypes/nilfunc
 $ ./nilfunc
 input.go:7:5: comparison of function Bytes == nil is always false
 input.go:7:25: comparison of function Repeat != nil is always true
@@ -1894,7 +1894,7 @@ The `main` function (not shown) loads the specified package and
 calls `PrintSkeleton` with the remaining two arguments:
 
 
-	// go get github.com/golang/example/gotypes/skeleton
+	// go get golang.org/x/example/gotypes/skeleton
 
 ```
 func PrintSkeleton(pkg *types.Package, ifacename, concname string) error {
@@ -1968,7 +1968,7 @@ The following program inspects all pairs of package-level named types
 in `pkg`, and reports the types that satisfy each interface type.
 
 
-	// go get github.com/golang/example/gotypes/implements
+	// go get golang.org/x/example/gotypes/implements
 
 ```
 // Find all named types at package level.
@@ -2000,7 +2000,7 @@ for _, T := range allNamed {
 Given this input,
 
 
-	// go get github.com/golang/example/gotypes/implements
+	// go get golang.org/x/example/gotypes/implements
 
 ```
 const input = `package main
@@ -2022,7 +2022,7 @@ the program prints:
 
 
 ```
-$ go build github.com/golang/example/gotypes/implements
+$ go build golang.org/x/example/gotypes/implements
 $ ./implements
 *hello.A satisfies hello.I
 hello.B satisfies hello.I
@@ -2177,7 +2177,7 @@ Such a tool could help identify inefficient parameter passing in your
 programs.
 
 
-	// go get github.com/golang/example/gotypes/hugeparam
+	// go get golang.org/x/example/gotypes/hugeparam
 
 ```
 var bytesFlag = flag.Int("bytes", 48, "maximum parameter size in bytes")
@@ -2336,7 +2336,7 @@ Here's the first part of the program, showing how to load an entire
 program starting from the single package, `pkgpath`:
 
 
-	// go get github.com/golang/example/gotypes/doc
+	// go get golang.org/x/example/gotypes/doc
 
 ```
 pkgpath, name := os.Args[1], os.Args[2]
@@ -2362,7 +2362,7 @@ Notice that we instructed the parser to retain comments during parsing.
 The rest of the program prints the output:
 
 
-	// go get github.com/golang/example/gotypes/doc
+	// go get golang.org/x/example/gotypes/doc
 
 ```
 // Print the object and its methods (incl. location of definition).
