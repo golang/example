@@ -12,6 +12,8 @@ demonstrate the language, standard libraries, and tools.
 
 A trivial "Hello, world" program that uses a stringutil package.
 
+I'm here
+
 Command [hello](hello/) covers:
 
 * The basic form of an executable command
