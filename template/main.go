@@ -23,6 +23,7 @@ limitations under the License.
 package main
 
 import (
+	"embed"
 	"html/template"
 	"log"
 	"net/http"
@@ -35,10 +36,13 @@ func main() {
 	log.Fatal(http.ListenAndServe("localhost:8080", nil))
 }
 
+//go:embed index.tmpl image.tmpl
+var templateFS embed.FS
+
 // indexTemplate is the main site template.
 // The default template includes two template blocks ("sidebar" and "content")
 // that may be replaced in templates derived from this one.
-var indexTemplate = template.Must(template.ParseFiles("index.tmpl"))
+var indexTemplate = template.Must(template.ParseFS(templateFS, "index.tmpl"))
 
 // Index is a data structure used to populate an indexTemplate.
 type Index struct {
@@ -70,7 +74,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 // imageTemplate is a clone of indexTemplate that provides
 // alternate "sidebar" and "content" templates.
-var imageTemplate = template.Must(template.Must(indexTemplate.Clone()).ParseFiles("image.tmpl"))
+var imageTemplate = template.Must(template.Must(indexTemplate.Clone()).ParseFS(templateFS, "image.tmpl"))
 
 // Image is a data structure used to populate an imageTemplate.
 type Image struct {
