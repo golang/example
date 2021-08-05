@@ -1,15 +1,24 @@
 # Go example projects
 
-
 [![Go Reference](https://pkg.go.dev/badge/golang.org/x/example.svg)](https://pkg.go.dev/golang.org/x/example)
 
 This repository contains a collection of Go programs and libraries that
 demonstrate the language, standard libraries, and tools.
 
+## Clone the project
+
+```
+$ git clone https://go.googlesource.com/example
+$ cd example
+```
+https://go.googlesource.com/example is the canonical Git repository.
+It is mirrored at https://github.com/golang/example.
 ## [hello](hello/) and [stringutil](stringutil/)
 
-    go get golang.org/x/example/hello
-
+```
+$ cd hello
+$ go build
+```
 A trivial "Hello, world" program that uses a stringutil package.
 
 Command [hello](hello/) covers:
@@ -26,8 +35,10 @@ Library [stringutil](stringutil/) covers:
 
 ## [outyet](outyet/)
 
-    go get golang.org/x/example/outyet
-
+```
+$ cd outyet
+$ go build
+```
 A web server that answers the question: "Is Go 1.x out yet?"
 
 Topics covered:
@@ -45,12 +56,10 @@ Topics covered:
 
 ## [appengine-hello](appengine-hello/)
 
-	goapp get golang.org/x/example/appengine-hello
-
 A trivial "Hello, world" App Engine application intended to be used as the
-starting point for your own code.
-
-_Note_: The `goapp` tool is part of the [Google App Engine SDK for Go](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Go).
+starting point for your own code. Please see
+[Google App Engine SDK for Go](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Go)
+and [Quickstart for Go in the App Engine Standard Environment](https://cloud.google.com/appengine/docs/standard/go/quickstart).
 
 ## [gotypes](gotypes/)
 
