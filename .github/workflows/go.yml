@@ -7,7 +7,6 @@ on:
     branches: [ master ]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -21,5 +20,9 @@ jobs:
     - name: Build
       run: go build -v ./...
       
-    - name: Test
-      run: go test -v ./...
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: binary
+        path: ${{github.workspace}}/hello/hello
+            
