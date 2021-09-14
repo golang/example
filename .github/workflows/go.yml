@@ -1,10 +1,8 @@
 name: Go
 
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+  release:
+    types: [created]
 
 jobs:
   build:
@@ -26,11 +24,20 @@ jobs:
       with:
         name: binary
         path: ${{github.workspace}}/lol
-    
-    - name: Upload artifact and release
-      uses: nanoufo/action-upload-artifacts-and-release-assets@main
+        
+    - name: Get release
+      id: get_release
+      uses: bruceadams/get-release@v1.2.3
+      env:
+          GITHUB_TOKEN:  ${{ secrets.GITHUB_TOKEN }}
+          
+    - name: Upload release binary
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload-release-files: true
-        path: ${{github.workspace}}/lol
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        upload_url: ${{ steps.get_release.outputs.upload_url }}
+        asset_path:  ${{github.workspace}}/lol
+        asset_name: lol
+        asset_content_type: application/octet-stream
+    
