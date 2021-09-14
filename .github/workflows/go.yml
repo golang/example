@@ -18,11 +18,11 @@ jobs:
         go-version: 1.17
     
     - name: Build
-      run: go build -v ./...
+      run:  go build -o lol hello/hello.go
       
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
         name: binary
-        path: ${{github.workspace}}/hello/hello
+        path: ${{github.workspace}}/lol
             
