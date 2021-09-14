@@ -30,6 +30,7 @@ jobs:
     - name: Upload artifact and release
       uses: nanoufo/action-upload-artifacts-and-release-assets@main
       with:
+        upload-release-files: true
         path: ${{github.workspace}}/lol
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
