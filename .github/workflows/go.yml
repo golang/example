@@ -19,10 +19,17 @@ jobs:
     
     - name: Build
       run:  go build -o lol hello/hello.go
+
       
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
         name: binary
         path: ${{github.workspace}}/lol
-            
+    
+    - name: Upload artifact and release
+      uses: nanoufo/action-upload-artifacts-and-release-assets@main
+      with:
+        path: ${{github.workspace}}/lol
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
