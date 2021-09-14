@@ -18,16 +18,8 @@ jobs:
       with:
         go-version: 1.17
     
-    - name: List files in the repository
-      run: |
-          ls ${{ github.workspace }}
-          VERSION=$(git describe --tags)
-          echo $VERSION
-
     - name: Build
       run: go build -v ./...
       
-
-
     - name: Test
       run: go test -v ./...
