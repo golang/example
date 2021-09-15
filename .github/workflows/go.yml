@@ -2,7 +2,7 @@ name: Go
 
 on:
   release:
-    types: [created]
+    types: [created, edited]
 
 jobs:
   build:
