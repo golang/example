@@ -34,7 +34,7 @@ jobs:
       with:
         file: "lol"
         overwrite: true
-        tags: true
+#         tags: true
 
        
       
