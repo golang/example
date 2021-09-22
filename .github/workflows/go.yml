@@ -1,9 +1,12 @@
 name: Go
 
 on:
-  release:
-    types: [created, edited]
-
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push:
+    branches:
+      - main
+      
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -17,27 +20,42 @@ jobs:
     
     - name: Build
       run:  go build -o lol hello/hello.go
-
       
-    - name: Archive production artifacts
-      uses: actions/upload-artifact@v2
+    - name: Run latest-tag
+      uses: EndBug/latest-tag@latest
       with:
-        name: binary
-        path: ${{github.workspace}}/lol
-        
-    - name: Get release
-      id: get_release
-      uses: bruceadams/get-release@v1.2.3
-      env:
-          GITHUB_TOKEN:  ${{ secrets.GITHUB_TOKEN }}
-          
-    - name: Upload release binary
-      uses: actions/upload-release-asset@v1.0.2
+        description: Description for the tag
+      
+    - name: upload another lib  
+      uses: xresloader/upload-to-github-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.get_release.outputs.upload_url }}
-        asset_path:  ${{github.workspace}}/lol
-        asset_name: lol
-        asset_content_type: application/octet-stream
+        file: "lol"
+        overwrite: true
+        tags: true
+
+       
+      
+#     - name: Archive production artifacts
+#       uses: actions/upload-artifact@v2
+#       with:
+#         name: binary
+#         path: ${{github.workspace}}/lol
+        
+#     - name: Get release
+#       id: get_release
+#       uses: bruceadams/get-release@v1.2.3
+#       env:
+#           GITHUB_TOKEN:  ${{ secrets.GITHUB_TOKEN }}
+          
+#     - name: Upload release binary
+#       uses: actions/upload-release-asset@v1.0.2
+#       env:
+#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       with:
+#         upload_url: ${{ steps.get_release.outputs.upload_url }}
+#         asset_path:  ${{github.workspace}}/lol
+#         asset_name: lol
+#         asset_content_type: application/octet-stream
     
