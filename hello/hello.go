@@ -21,6 +21,6 @@ import (
 )
 
 func main() {
-	fmt.Println("lol")
+	fmt.Println("lol updated")
 	// fmt.Println(stringutil.Reverse("!selpmaxe oG ,olleH"))
 }
