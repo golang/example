@@ -35,29 +35,6 @@ jobs:
         file: "lol"
         overwrite: true
         draft: false
-#         tags: true
 
        
-      
-#     - name: Archive production artifacts
-#       uses: actions/upload-artifact@v2
-#       with:
-#         name: binary
-#         path: ${{github.workspace}}/lol
-        
-#     - name: Get release
-#       id: get_release
-#       uses: bruceadams/get-release@v1.2.3
-#       env:
-#           GITHUB_TOKEN:  ${{ secrets.GITHUB_TOKEN }}
-          
-#     - name: Upload release binary
-#       uses: actions/upload-release-asset@v1.0.2
-#       env:
-#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#       with:
-#         upload_url: ${{ steps.get_release.outputs.upload_url }}
-#         asset_path:  ${{github.workspace}}/lol
-#         asset_name: lol
-#         asset_content_type: application/octet-stream
-    
+
