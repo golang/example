@@ -11,7 +11,7 @@ node("test_node") {
 	echo "Build done!"
     }
     stage('docker run') {
-        docker run gendalf
+        sh 'docker run gendalf'
 	echo "End of pipeline"
     }
 }
