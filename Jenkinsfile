@@ -1,4 +1,5 @@
-currentBuild.displayName = currentBuild.number+"#"+" testcase/coloraize/log_parser/build_name:<br>"+currentBuild.number
+//currentBuild.displayName = currentBuild.number+"#"+" testcase/coloraize/log_parser/build_name:"+currentBuild.number
+currentBuild.displayName = currentBuild.number+"#"+$BRANCH_NAME 
 currentBuild.description = "test desc" 
 
 node("test_node") {
