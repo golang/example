@@ -1,4 +1,5 @@
-buildName('#${BUILD_NUMBER} on ${ENV,var="BRANCH"}')
+currentBuild.displayName = currentBuild.number+"#"+" testcase:"+currentBuild.number
+
 node("test_node") {
 
     stage('git clone') { // for display purposes
