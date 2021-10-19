@@ -5,6 +5,9 @@ node("test_node") {
 	sh 'ls -la'
 	sh 'id'
     	echo "Git clone done!"
+    stage('test job') {
+        echo "test"
+    }
     }
     stage('build') {
 	sh 'docker build . -t gendalf'
