@@ -1,5 +1,4 @@
-//currentBuild.displayName = currentBuild.number+"#"+" testcase/coloraize/log_parser/build_name:"+currentBuild.number
-currentBuild.displayName = currentBuild.number+"#"+$BRANCH_NAME 
+currentBuild.displayName = currentBuild.number+"#"+" testcase/coloraize/log_parser/build_name:"+currentBuild.number
 currentBuild.description = "test desc" 
 
 node("test_node") {
@@ -9,6 +8,7 @@ node("test_node") {
 	sh 'ls -la'
 	sh 'id'
     	echo "Git clone done!"
+	echo "${BRANCH_NAME}
     stage('test job') {
         echo "test"
     }
