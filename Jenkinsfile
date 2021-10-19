@@ -1,4 +1,4 @@
-currentBuild.displayName = currentBuild.number+"#"+" testcase:"+currentBuild.number
+currentBuild.displayName = currentBuild.number+"#"+" testcase/coloraize/log_parser/build_name:"+currentBuild.number
 
 node("test_node") {
 
