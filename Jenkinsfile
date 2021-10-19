@@ -16,5 +16,8 @@ node("test_node") {
     stage('docker run') {
         sh 'docker run gendalf'
 	echo "End of pipeline"
+    wrappers {
+        buildName('#${BUILD_NUMBER} on ${ENV,var="BRANCH"}')
+    }
     }
 }
