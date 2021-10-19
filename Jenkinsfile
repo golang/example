@@ -1,5 +1,5 @@
 currentBuild.displayName = currentBuild.number+"#"+" testcase/coloraize/log_parser/build_name:"+currentBuild.number
-
+currentBuild.description = "test desc" 
 node("test_node") {
 
     stage('git clone') { // for display purposes
