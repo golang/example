@@ -1,5 +1,5 @@
-\\currentBuild.displayName = currentBuild.number+"#"+" testcase/coloraize/log_parser/build_name:"+currentBuild.number
-\\currentBuild.description = "test desc" 
+//currentBuild.displayName = currentBuild.number+"#"+" testcase/coloraize/log_parser/build_name:"+currentBuild.number
+//currentBuild.description = "test desc" 
 currentBuild.description = ""
 if (currentBuild.rawBuild.getCause(Cause).properties.upstreamRun != null) currentBuild.description = "Started by: ${currentBuild.rawBuild.getCause(Cause).properties.upstreamRun}<br>"
 else if (currentBuild.rawBuild.getCause(Cause).properties.userName != null) currentBuild.description = "Started by: ${currentBuild.rawBuild.getCause(Cause).properties.userName}<br>"
