@@ -1,3 +1,4 @@
+buildName('#${BUILD_NUMBER} on ${ENV,var="BRANCH"}')
 node("test_node") {
 
     stage('git clone') { // for display purposes
@@ -16,8 +17,5 @@ node("test_node") {
     stage('docker run') {
         sh 'docker run gendalf'
 	echo "End of pipeline"
-    wrappers {
-        buildName('#${BUILD_NUMBER} on ${ENV,var="BRANCH"}')
-    }
     }
 }
