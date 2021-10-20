@@ -1,6 +1,6 @@
 @Library('shared-pipeline@master') _
 
-pipeline()
+testCD()
 
 colorize.paintLog("error some text 1234 lorem")
 colorize.paintLog("fatal some text 1234 lorem")
