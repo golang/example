@@ -2,7 +2,7 @@
 
 testCD()
 
-colorize.paintLog("error some text 1234 lorem")
+colorize.paintLog("${BUILD_NUMBER}")
 colorize.paintLog("fatal some text 1234 lorem")
 colorize.paintLog("invalid some text 1234 lorem")
 colorize.paintLog("warning some text 1234 lorem")
