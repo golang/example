@@ -34,7 +34,7 @@ jobs:
         key: ${{ runner.os }}-pip
         
     - name: install python package
-      if: steps.python.outputs.cache-hit != 'true'
+#       if: steps.python.outputs.cache-hit != 'true'
       run: |
         pip install ansible boto3
         
