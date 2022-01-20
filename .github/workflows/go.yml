@@ -39,7 +39,7 @@ jobs:
         pip install ansible boto3
         
     - name: ansible
-      run: ansible -h
+      run: pip list
   
        
 
