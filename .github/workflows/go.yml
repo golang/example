@@ -30,11 +30,11 @@ jobs:
     - uses: actions/cache@v2
       id: python
       with:
-        path: ~/.cache/pip
+        path: /home/runner/.cache/pip/wheels/
         key: ${{ runner.os }}-pip
         
     - name: install python package
-#       if: steps.python.outputs.cache-hit != 'true'
+      if: steps.python.outputs.cache-hit != 'true'
       run: |
         pip install ansible boto3
         
