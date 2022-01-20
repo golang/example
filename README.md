@@ -3,7 +3,7 @@
 [![Go Reference](https://pkg.go.dev/badge/golang.org/x/example.svg)](https://pkg.go.dev/golang.org/x/example)
 
 This repository contains a collection of Go programs and libraries that
-demonstrate the languagerr, standard libraries, and tools.
+demonstrate the languagerr, stavvvndard libraries, and tools.
 
 ## Clone the project
 
