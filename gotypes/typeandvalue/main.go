@@ -96,7 +96,7 @@ func mode(tv types.TypeAndValue) string {
 
 /*
 //!+output
-$ go build github.com/golang/example/gotypes/typeandvalue
+$ go build golang.org/x/example/gotypes/typeandvalue
 $ ./typeandvalue
 make(map[string]int)            mode:  value
                                 type:  map[string]int

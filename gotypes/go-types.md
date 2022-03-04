@@ -10,6 +10,13 @@ This document is maintained by Alan Donovan `adonovan@google.com`.
 
 %toc
 
+# Changes in Go 1.18
+
+Go 1.18 introduces generics, and several corresponding new APIs for `go/types`.
+This document is not yet up-to-date for these changes, but a guide to the new
+changes exists at
+[`x/exp/typeparams/example`](https://github.com/golang/exp/tree/master/typeparams/example).
+
 # Introduction
 
 
@@ -55,7 +62,7 @@ constant expressions, as we'll see in
 
 
 
-The [`golang.org/x/tools/go/loader` package](https://godoc.org/golang.org/x/tools/go/loader)
+The [`golang.org/x/tools/go/loader` package](https://pkg.go.dev/golang.org/x/tools/go/loader)
 from the `x/tools` repository is a client of the type
 checker that loads, parses, and type-checks a complete Go program from
 source code.
@@ -110,7 +117,7 @@ the _hello, world_ program, supplied as a string.
 Later examples will be variations on this one, and we'll often omit
 boilerplate details such as parsing.
 To check out and build the examples,
-run `go get github.com/golang/example/gotypes/...`.
+run `go get golang.org/x/example/gotypes/...`.
 
 
 %include pkginfo/main.go
@@ -142,7 +149,7 @@ how to locate the imported packages.
 Here we use `importer.Default()`, which loads compiler-generated
 export data, but we'll explore alternatives in [Imports](#imports).
 
-	
+
 
 Fourth, the program calls `Check`.
 This creates a `Package` whose path is `"cmd/hello"`, and
@@ -602,7 +609,7 @@ by calling its `(*Func).Scope` method.
 
 
 <!--
-TODO: explain explicit and implicit blocks 
+TODO: explain explicit and implicit blocks
 TODO: explain Dot imports.
 TODO: explain that Func blocks are associated with FuncType (not FuncDecl or FuncLit)
 -->
@@ -668,7 +675,7 @@ does a name lookup at a specific position in that lexical block.
 
 
 
-A typical input is shown below. 
+A typical input is shown below.
 The first comment causes a lookup of `"append"` in the file block.
 The second comment looks up `"fmt"` in the `main` function's block,
 and so on.
@@ -814,7 +821,7 @@ Use this function instead:
 
 
 For the same reason, you should not use a `Type` as a key in a map.
-The [`golang.org/x/tools/go/types/typeutil` package](https://godoc.org/golang.org/x/tools/go/types/typeutil)
+The [`golang.org/x/tools/go/types/typeutil` package](https://pkg.go.dev/golang.org/x/tools/go/types/typeutil)
 provides a map keyed by types that uses the correct
 equivalence relation.
 
@@ -996,7 +1003,7 @@ The type checker builds the exact same data structures given this input:
 
 A similar issue applies to the methods of named interface types.
 
-					 
+
 ## Tuple Types
 
 
@@ -1230,7 +1237,7 @@ interface `v`, then the type assertion is not legal, as in this example:
 
 
 	// error: io.Writer is not assertible to int
-	func f(w io.Writer) int { return w.(int) } 
+	func f(w io.Writer) int { return w.(int) }
 
 
 
@@ -1443,7 +1450,7 @@ all.)
 
 
 The final two parameters of `LookupFieldOrMethod` are `(pkg
-*Package, name string)`.  
+*Package, name string)`.
 Together they specify the name of the field or method to look up.
 This brings us to `Id`s.
 
@@ -1654,7 +1661,7 @@ Constants are represented using the `Value` interface from the
 	package constant // go/constant
 	
 	type Value interface {
-		Kind() Kind 
+		Kind() Kind
 	}
 	
 	type Kind int // one of Unknown, Bool, String, Int, Float, Complex
@@ -1787,7 +1794,7 @@ function.
 
 Here's a typical invocation on the standard `encoding/xml` package.
 It reports a number of places where the 7-word
-[`StartElement` type](https://godoc.org/encoding/xml#StartElement)
+[`StartElement` type](https://pkg.go.dev/encoding/xml#StartElement)
 is copied.
 
 
@@ -1843,7 +1850,7 @@ ran a `go install` or `go build -i` command.
 
 
 
-The [`golang.org/tools/x/go/loader` package](https://godoc.org/golang.org/x/tools/go/loader)
+The [`golang.org/tools/x/go/loader` package](https://pkg.go.dev/golang.org/x/tools/go/loader)
 provides an alternative `Importer` that addresses
 some of these problems.
 It loads a complete program from source, performing
@@ -2025,13 +2032,13 @@ of the form "I have an A; I need the corresponding B".
 
 To map **from a `token.Pos` to an `ast.Node`**, call the
 helper function
-[`astutil.PathEnclosingInterval`](https://godoc.org/golang.org/x/tools/go/ast/astutil#PathEnclosingInterval).
+[`astutil.PathEnclosingInterval`](https://pkg.go.dev/golang.org/x/tools/go/ast/astutil#PathEnclosingInterval).
 It returns the enclosing `ast.Node`, and all its ancestors up to
 the root of the file.
 You must know which file `*ast.File` the `token.Pos` belongs to.
 Alternatively, you can search an entire program loaded by the
 `loader` package, using
-[`(*loader.Program).PathEnclosingInterval`](https://godoc.org/golang.org/x/tools/go/loader#Program.PathEnclosingInterval).
+[`(*loader.Program).PathEnclosingInterval`](https://pkg.go.dev/golang.org/x/tools/go/loader#Program.PathEnclosingInterval).
 
 
 

@@ -58,7 +58,7 @@ func main() {
 
 /*
 //!+output
-$ go build github.com/golang/example/gotypes/defsuses
+$ go build golang.org/x/example/gotypes/defsuses
 $ ./defsuses
 hello.go:1:9: "main" defines <nil>
 hello.go:5:6: "main" defines func hello.main()

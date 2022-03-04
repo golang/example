@@ -95,7 +95,7 @@ func CheckNilFuncComparison(info *types.Info, n ast.Node) {
 
 /*
 //!+output
-$ go build github.com/golang/example/gotypes/nilfunc
+$ go build golang.org/x/example/gotypes/nilfunc
 $ ./nilfunc
 input.go:7:5: comparison of function Bytes == nil is always false
 input.go:7:25: comparison of function Repeat != nil is always true
