@@ -10,7 +10,7 @@ import (
 	"log"
 )
 
-//!+input
+// !+input
 const input = `package main
 
 import "bytes"
@@ -50,7 +50,7 @@ func main() {
 	})
 }
 
-//!+
+// !+
 // CheckNilFuncComparison reports unintended comparisons
 // of functions against nil, e.g., "if x.Method == nil {".
 func CheckNilFuncComparison(info *types.Info, n ast.Node) {

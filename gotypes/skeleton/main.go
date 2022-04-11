@@ -2,6 +2,7 @@
 // that implements the specified interface type.
 //
 // Example:
+//
 //	$ ./skeleton io ReadWriteCloser buffer
 //	// *buffer implements io.ReadWriteCloser.
 //	type buffer struct{ /* ... */ }
@@ -24,7 +25,7 @@ import (
 
 const usage = "Usage: skeleton <package> <interface> <concrete>"
 
-//!+
+// !+
 func PrintSkeleton(pkg *types.Package, ifacename, concname string) error {
 	obj := pkg.Scope().Lookup(ifacename)
 	if obj == nil {

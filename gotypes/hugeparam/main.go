@@ -1,6 +1,7 @@
 // The hugeparam command identifies by-value parameters that are larger than n bytes.
 //
 // Example:
+//
 //	$ ./hugeparams encoding/xml
 package main
 
@@ -15,7 +16,7 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-//!+
+// !+
 var bytesFlag = flag.Int("bytes", 48, "maximum parameter size in bytes")
 
 var sizeof = (&types.StdSizes{8, 8}).Sizeof // the sizeof function

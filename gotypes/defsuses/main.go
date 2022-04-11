@@ -19,7 +19,7 @@ func main() {
 }
 `
 
-//!+
+// !+
 func PrintDefsUses(fset *token.FileSet, files ...*ast.File) error {
 	conf := types.Config{Importer: importer.Default()}
 	info := &types.Info{

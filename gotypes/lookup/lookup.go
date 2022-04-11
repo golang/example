@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-//!+input
+// !+input
 const hello = `
 package main
 
@@ -32,7 +32,7 @@ func main() {
 
 //!-input
 
-//!+main
+// !+main
 func main() {
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, "hello.go", hello, parser.ParseComments)

@@ -2,7 +2,8 @@
 // It builds a table of contents and processes %include directives.
 //
 // Example usage:
-// 	$ go run weave.go go-types.md > README.md
+//
+//	$ go run weave.go go-types.md > README.md
 package main
 
 import (

@@ -10,7 +10,7 @@ import (
 	"log"
 )
 
-//!+input
+// !+input
 const input = `package main
 
 type A struct{}
