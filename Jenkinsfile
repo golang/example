@@ -1,4 +1,4 @@
-@Library('shared-pipeline@master') _
+@Library('shared-pipeline@test_params') _
 
 testCD()
 
