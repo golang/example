@@ -8,7 +8,8 @@
         checkoutProject()
       }
       stage('Test stage') {
-        sh 'ls -la'
+        dockerBuildPush()
+        sh 'docker images'
       }
       println "Ended example pipeline."
     }
