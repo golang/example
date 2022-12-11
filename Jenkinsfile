@@ -10,5 +10,6 @@
       stage('Test stage') {
         sh 'ls -la'
       }
+      println "End example pipeline."
     }
   }
