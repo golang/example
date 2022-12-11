@@ -1,5 +1,14 @@
-@Library('shared-pipeline@test_params') _
-env.SOME
+@Library('shared-pipeline@feature/rewrite') _
 
-testCD()
-
+  node(jenkinsAgent) {
+    timestamps {
+      stage('Checkout project') {
+        println "Executing example pipeline.."
+        cleanWs()
+        checkoutProject()
+      }
+      stage('Test stage') {
+        sh 'ls -la'
+      }
+    }
+  }
