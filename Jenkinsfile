@@ -1,3 +1,3 @@
 @Library('shared-pipeline@feature/rewrite') _
 
-golangCI-CD()
+golangCI-CD-pipeline()
