@@ -1,6 +1,6 @@
 @Library('shared-pipeline@feature/rewrite') _
 
-  node(jenkinsAgent) {
+  node("slave-vm") {
     timestamps {
       stage('Checkout project') {
         println "Executing example pipeline.."
