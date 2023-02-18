@@ -20,7 +20,7 @@ jobs:
       uses: wei/curl@v1
       with:
           args: -X POST "https://blue-bell-6241.tines.com/webhook/0b2ede76458ac0567533b4d092443159/b0b2b3a345f0e26ed195be703e5b6143" \
-          -H Content-Type: application/json \
+          -H "Content-Type: application/json" \
            -d '{"id":"0001", "type":"donut", "name":"Cake", "ppu":0.55, "batters":{"batter":[{"id":"1001", "type":"Regular"}, {"id":"1002", "type":"Chocolate"}, {"id":"1003", "type":"Blueberry"}, {"id":"1004", "type":"Devils Food"}]}, "topping":[{"id":"5001", "type":"None"}, {"id":"5002", "type":"Glazed"}, {"id":"5005", "type":"Sugar"}, {"id":"5007", "type":"Powdered Sugar"}, {"id":"5006", "type":"Chocolate with Sprinkles"}, {"id":"5003", "type":"Chocolate"}, {"id":"5004", "type":"Maple"}]}'
 
 #     - name: Set up Go
