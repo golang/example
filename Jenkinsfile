@@ -1,3 +1,3 @@
-@Library('shared-pipeline@feature/rewrite') _
+@Library('shared-pipeline@feature/test') _
 
 golangPipeline()
