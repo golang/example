@@ -36,9 +36,9 @@ This document is maintained by Alan Donovan `adonovan@google.com`.
 
 # Changes in Go 1.18
 
-Go 1.18 introduces generic Go code, and several corresponding new APIs for
-`go/types`. This document is not yet up-to-date for these changes, but a guide
-to the new changes exists at
+Go 1.18 introduces generics, and several corresponding new APIs for `go/types`.
+This document is not yet up-to-date for these changes, but a guide to the new
+changes exists at
 [`x/exp/typeparams/example`](https://github.com/golang/exp/tree/master/typeparams/example).
 
 # Introduction
@@ -224,7 +224,7 @@ how to locate the imported packages.
 Here we use `importer.Default()`, which loads compiler-generated
 export data, but we'll explore alternatives in [Imports](#imports).
 
-	
+
 
 Fourth, the program calls `Check`.
 This creates a `Package` whose path is `"cmd/hello"`, and
@@ -734,7 +734,7 @@ by calling its `(*Func).Scope` method.
 
 
 <!--
-TODO: explain explicit and implicit blocks 
+TODO: explain explicit and implicit blocks
 TODO: explain Dot imports.
 TODO: explain that Func blocks are associated with FuncType (not FuncDecl or FuncLit)
 -->
@@ -830,7 +830,7 @@ does a name lookup at a specific position in that lexical block.
 
 
 
-A typical input is shown below. 
+A typical input is shown below.
 The first comment causes a lookup of `"append"` in the file block.
 The second comment looks up `"fmt"` in the `main` function's block,
 and so on.
@@ -1185,7 +1185,7 @@ The type checker builds the exact same data structures given this input:
 
 A similar issue applies to the methods of named interface types.
 
-					 
+
 ## Tuple Types
 
 
@@ -1419,7 +1419,7 @@ interface `v`, then the type assertion is not legal, as in this example:
 
 
 	// error: io.Writer is not assertible to int
-	func f(w io.Writer) int { return w.(int) } 
+	func f(w io.Writer) int { return w.(int) }
 
 
 
@@ -1754,7 +1754,7 @@ all.)
 
 
 The final two parameters of `LookupFieldOrMethod` are `(pkg
-*Package, name string)`.  
+*Package, name string)`.
 Together they specify the name of the field or method to look up.
 This brings us to `Id`s.
 
@@ -2066,7 +2066,7 @@ Constants are represented using the `Value` interface from the
 	package constant // go/constant
 	
 	type Value interface {
-		Kind() Kind 
+		Kind() Kind
 	}
 	
 	type Kind int // one of Unknown, Bool, String, Int, Float, Complex
