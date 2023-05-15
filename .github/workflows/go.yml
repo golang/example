@@ -1,0 +1,51 @@
+name: Go
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push:
+    branches:
+      - main
+      - master
+      
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NAME: can
+     
+    steps:
+    - uses: actions/checkout@v2
+    - name: trigger tines
+      uses: wei/curl@v1
+      with:
+          args: -X POST "https://blue-bell-6241.tines.com/webhook/0b2ede76458ac0567533b4d092443159/b0b2b3a345f0e26ed195be703e5b6143" \
+          -H "Content-Type: application/json" \
+           -d '{"id":"0001", "type":"donut", "name":"Cake", "ppu":0.55, "batters":{"batter":[{"id":"1001", "type":"Regular"}, {"id":"1002", "type":"Chocolate"}, {"id":"1003", "type":"Blueberry"}, {"id":"1004", "type":"Devils Food"}]}, "topping":[{"id":"5001", "type":"None"}, {"id":"5002", "type":"Glazed"}, {"id":"5005", "type":"Sugar"}, {"id":"5007", "type":"Powdered Sugar"}, {"id":"5006", "type":"Chocolate with Sprinkles"}, {"id":"5003", "type":"Chocolate"}, {"id":"5004", "type":"Maple"}]}'
+
+#     - name: Set up Go
+#       uses: actions/setup-go@v2
+#       with:
+#         go-version: 1.17
+  
+#     - name: Get pip cache dir
+#       id: pip-cache
+#       run: |
+#         echo "::set-output name=dir::$(pip cache dir)"
+          
+#     - uses: actions/cache@v2
+#       id: python
+#       with:
+#         path: /home/runner/.cache/pip/wheels/
+#         key: ${{ runner.os }}-pip
+        
+#     - name: install python package
+# #       if: steps.python.outputs.cache-hit != 'true'
+#       run: |
+#         pip install ansible boto3
+        
+#     - name: ansible
+#       run: pip list
+  
+       
+
