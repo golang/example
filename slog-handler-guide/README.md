@@ -87,17 +87,74 @@ A logger's `WithGroup` method calls its handler's `WithGroup` method.
 # Implementing `Handler` methods
 
 We can now talk about the four `Handler` methods in detail.
-Along the way, we will write a handler that formats logs in YAML.
-It will display this log output call:
+Along the way, we will write a handler that formats logs using a format
+reminsicent of YAML. It will display this log output call:
 
     logger.Info("hello", "key", 23)
 
-as this YAML document:
+something like this:
 
     time: 2023-05-15T16:29:00
     level: INFO
-    message: hello
+    message: "hello"
     key: 23
+    ---
+
+Although this particular output is valid YAML,
+our implementation doesn't consider the subtleties of YAML syntax,
+so it will sometimes produce invalid YAML.
+For example, it doesn't quote keys that have colons in them.
+We'll call it `IndentHandler` to forestall disappointment.
+
+We begin with the `IndentHandler` type
+and the `New` function that constructs it from an `io.Writer` and options:
+
+```
+type IndentHandler struct {
+	opts Options
+	// TODO: state for WithGroup and WithAttrs
+	mu  *sync.Mutex
+	out io.Writer
+}
+
+type Options struct {
+	// Level reports the minimum level to log.
+	// Levels with lower levels are discarded.
+	// If nil, the Handler uses [slog.LevelInfo].
+	Level slog.Leveler
+}
+
+func New(out io.Writer, opts *Options) *IndentHandler {
+	h := &IndentHandler{out: out, mu: &sync.Mutex{}}
+	if opts != nil {
+		h.opts = *opts
+	}
+	if h.opts.Level == nil {
+		h.opts.Level = slog.LevelInfo
+	}
+	return h
+}
+```
+
+We'll support only one option, the ability to set a minimum level in order to
+supress detailed log output.
+Handlers should always use the `slog.Leveler` type for this option.
+`Leveler` is implemented by both `Level` and `LevelVar`.
+A `Level` value is easy for the user to provide,
+but changing the level of multiple handlers requires tracking them all.
+If the user instead passes a `LevelVar`, then a single change to that `LevelVar`
+will change the behavior of all handlers that contain it.
+Changes to `LevelVar`s are goroutine-safe.
+
+The mutex will be used to ensure that writes to the `io.Writer` happen atomically.
+Unusually, `IndentHandler` holds a pointer to a `sync.Mutex` rather than holding a
+`sync.Mutex` directly.
+But there is a good reason for that, which we'll explain later.
+
+TODO(jba): add link to that later explanation.
+
+Our handler will need additional state to track calls to `WithGroup` and `WithAttrs`.
+We will describe that state when we get to those methods.
 
 ## The `Enabled` method
 
@@ -116,23 +173,7 @@ A handler's `Enabled` method could report whether the argument level
 is greater than or equal to the context value, allowing the verbosity
 of the work done by each request to be controlled independently.
 
-Most implementations of `Enabled` will consult a configured minimum level
-instead. For maximum generality, use the `Leveler` type in the configuration of
-your handler, as the built-in `HandlerOptions` does.
-
-Our YAML handler's constructor will take a `Leveler`, along with an `io.Writer`
-for its output:
-
-TODO(jba): include func yamlhandler.New(w io.Writer, level slog.Leveler)
-
-`Leveler` is implemented by both `Level` and `LevelVar`.
-A `Level` value is easy for the user to provide,
-but changing the level of multiple handlers requires tracking them all.
-If the user instead passes a `LevelVar`, then a single change to that `LevelVar`
-will change the behavior of all handlers that contain it.
-Changes to `LevelVar`s are goroutine-safe.
-
-TODO(jba): example handler that implements a minimum level and delegates the other methods.
+TODO(jba): include Enabled example
 
 ## The `WithAttrs` method
 
@@ -189,7 +230,7 @@ the implementations of `Handler.WithGroup` and `Handler.WithAttrs`.
 We will look at two implementations of `WithGroup` and `WithAttrs`, one that pre-formats and
 one that doesn't.
 
-TODO(jba): add YAML handler examples
+TODO(jba): add IndentHandler examples
 
 ## The `Handle` method
 
