@@ -113,7 +113,7 @@ Changes to `LevelVar`s are goroutine-safe.
 The mutex will be used to ensure that writes to the `io.Writer` happen atomically.
 Unusually, `IndentHandler` holds a pointer to a `sync.Mutex` rather than holding a
 `sync.Mutex` directly.
-But there is a good reason for that, which we'll explain later.
+There is a good reason for that, which we'll explain later.
 
 TODO(jba): add link to that later explanation.
 
@@ -138,6 +138,76 @@ is greater than or equal to the context value, allowing the verbosity
 of the work done by each request to be controlled independently.
 
 TODO(jba): include Enabled example
+
+## The `Handle` method
+
+The `Handle` method is passed a `Record` containing all the information to be
+logged for a single call to a `Logger` output method.
+The `Handle` method should deal with it in some way.
+One way is to output the `Record` in some format, as `TextHandler` and `JSONHandler` do.
+But other options are to modify the `Record` and pass it on to another handler,
+enqueue the `Record` for later processing, or ignore it.
+
+The signature of `Handle` is
+
+    Handle(context.Context, Record) error
+
+The context is provided to support applications that provide logging information
+along the call chain. In a break with usual Go practice, the `Handle` method
+should not treat a canceled context as a signal to stop work.
+
+If `Handle` processes its `Record`, it should follow the rules in the
+[documentation](https://pkg.go.dev/log/slog#Handler.Handle).
+For example, a zero `Time` field should be ignored, as should zero `Attr`s.
+
+A `Handle` method that is going to produce output should carry out the following steps:
+
+1. Allocate a buffer, typically a `[]byte`, to hold the output.
+It's best to construct the output in memory first,
+then write it with a single call to `io.Writer.Write`,
+to minimize interleaving with other goroutines using the same writer.
+
+2. Format the special fields: time, level, message, and source location (PC).
+As a general rule, these fields should appear first and are not nested in
+groups established by `WithGroup`.
+
+3. Format the result of `WithGroup` and `WithAttrs` calls.
+
+4. Format the attributes in the `Record`.
+
+5. Output the buffer.
+
+That is how our `IndentHandler`'s `Handle` method is structured:
+
+%include indenthandler1/indent_handler.go handle -
+
+The first line allocates a `[]byte` that should be large enough for most log
+output.
+Allocating a buffer with some initial, fairly large capacity is a simple but
+significant optimization: it avoids the repeated copying and allocation that
+happen when the initial slice is empty or small.
+We'll return to this line in the section on [speed](#speed)
+and show how we can do even better.
+
+The next part of our `Handle` method formats the special attributes,
+observing the rules to ignore a zero time and a zero PC.
+
+Next, the method processes the result of `WithAttrs` and `WithGroup` calls.
+We'll skip that for now.
+
+Then it's time to process the attributes in the argument record.
+We use the `Record.Attrs` method to iterate over the attributes
+in the order the user passed them to the `Logger` output method.
+Handlers are free to reorder or de-duplicate the attributes,
+but ours does not.
+
+Lastly, after adding the line "---" to the output to separate log records,
+our handler makes a single call to `h.out.Write` with the buffer we've accumulated.
+We hold the lock for this write to make it atomic with respect to other
+goroutines that may be calling `Handle` at the same time.
+
+TODO(jba): talk about appendAttr
+
 
 ## The `WithAttrs` method
 
@@ -196,76 +266,14 @@ one that doesn't.
 
 TODO(jba): add IndentHandler examples
 
-## The `Handle` method
+## Testing
 
-The `Handle` method is passed a `Record` containing all the information to be
-logged for a single call to a `Logger` output method.
-The `Handle` method should deal with it in some way.
-One way is to output the `Record` in some format, as `TextHandler` and `JSONHandler` do.
-But other options are to modify the `Record` and pass it on to another handler,
-enqueue the `Record` for later processing, or ignore it.
-
-The signature of `Handle` is
-
-    Handle(context.Context, Record) error
-
-The context is provided to support applications that provide logging information
-along the call chain. In a break with usual Go practice, the `Handle` method
-should not treat a canceled context as a signal to stop work.
-
-If `Handle` processes its `Record`, it should follow the rules in the
-[documentation](https://pkg.go.dev/log/slog#Handler.Handle).
-For example, a zero `Time` field should be ignored, as should zero `Attr`s.
 To verify that your handler follows these rules and generally produces proper
 output, use the [testing/slogtest package](https://pkg.go.dev/log/slog).
 
-Before processing the attributes in the `Record`, remember to process the
-attributes from `WithAttrs` calls, qualified by the groups from `WithGroup`
-calls. Then use `Record.Attrs` to process the attributes in the `Record`, also
-qualified by the groups from `WithGroup` calls.
+TODO(jba): show the test function.
 
-The attributes provided to `Handler.WithAttrs` appear in the order the user passed them
-to `Logger.With`, and `Record.Attrs` traverses attributes in the order the user
-passed them to the `Logger` output method. Handlers are free to reorder or
-de-duplicate the attributes, provided group qualification is preserved.
-
-Your handler can make a single copy of a `Record` with an ordinary Go
-assignment, channel send or function call if it doesn't retain the
-original.
-But if its actions result in more than one copy, it should call `Record.Clone`
-to make the copies so that they don't share state.
-This `Handle` method passes the record to a single handler, so it doesn't require `Clone`:
-
-    type Handler1 struct {
-        h slog.Handler
-        // ...
-    }
-
-    func (h *Handler1) Handle(ctx context.Context, r slog.Record) error {
-        return h.h.Handle(ctx, r)
-    }
-
-This `Handle` method might pass the record to more than one handler, so it
-should use `Clone`:
-
-    type Handler2 struct {
-        hs []slog.Handler
-        // ...
-    }
-
-    func (h *Handler2) Handle(ctx context.Context, r slog.Record) error {
-        for _, hh := range h.hs {
-            if err := hh.Handle(ctx, r.Clone()); err != nil {
-                return err
-            }
-        }
-        return nil
-    }
-
-
-
-TODO(jba): example use of slogtest
-
+TODO(jba): reintroduce the material on Record.Clone that used to be here.
 
 # General considerations
 
@@ -356,3 +364,5 @@ error.
 ## Speed
 
 TODO(jba): discuss
+
+TODO(jba): show how to pool a []byte.
