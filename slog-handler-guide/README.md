@@ -174,7 +174,14 @@ A handler's `Enabled` method could report whether the argument level
 is greater than or equal to the context value, allowing the verbosity
 of the work done by each request to be controlled independently.
 
-TODO(jba): include Enabled example
+Our `IndentHandler` doesn't use the context. It just compares the argument level
+with its configured minimum level:
+
+```
+func (h *IndentHandler) Enabled(ctx context.Context, level slog.Level) bool {
+	return level >= h.opts.Level.Level()
+}
+```
 
 ## The `Handle` method
 

@@ -137,7 +137,10 @@ A handler's `Enabled` method could report whether the argument level
 is greater than or equal to the context value, allowing the verbosity
 of the work done by each request to be controlled independently.
 
-TODO(jba): include Enabled example
+Our `IndentHandler` doesn't use the context. It just compares the argument level
+with its configured minimum level:
+
+%include indenthandler1/indent_handler.go enabled -
 
 ## The `Handle` method
 

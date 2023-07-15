@@ -40,9 +40,12 @@ func New(out io.Writer, opts *Options) *IndentHandler {
 
 //!-types
 
+// !+enabled
 func (h *IndentHandler) Enabled(ctx context.Context, level slog.Level) bool {
 	return level >= h.opts.Level.Level()
 }
+
+//!-enabled
 
 func (h *IndentHandler) WithGroup(name string) slog.Handler {
 	// TODO: implement.
@@ -54,6 +57,7 @@ func (h *IndentHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	return h
 }
 
+// !+handle
 func (h *IndentHandler) Handle(ctx context.Context, r slog.Record) error {
 	buf := make([]byte, 0, 1024)
 	if !r.Time.IsZero() {
@@ -79,6 +83,9 @@ func (h *IndentHandler) Handle(ctx context.Context, r slog.Record) error {
 	return err
 }
 
+//!-handle
+
+// !+appendAttr
 func (h *IndentHandler) appendAttr(buf []byte, a slog.Attr, indentLevel int) []byte {
 	// Resolve the Attr's value before doing anything else.
 	a.Value = a.Value.Resolve()
@@ -115,3 +122,5 @@ func (h *IndentHandler) appendAttr(buf []byte, a slog.Attr, indentLevel int) []b
 	}
 	return buf
 }
+
+//!-appendAttr
