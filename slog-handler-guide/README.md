@@ -268,8 +268,65 @@ our handler makes a single call to `h.out.Write` with the buffer we've accumulat
 We hold the lock for this write to make it atomic with respect to other
 goroutines that may be calling `Handle` at the same time.
 
-TODO(jba): talk about appendAttr
+At the heart of the handler is the `appendAttr` method, responsible for
+formatting a single attribute:
 
+```
+func (h *IndentHandler) appendAttr(buf []byte, a slog.Attr, indentLevel int) []byte {
+	// Resolve the Attr's value before doing anything else.
+	a.Value = a.Value.Resolve()
+	// Ignore empty Attrs.
+	if a.Equal(slog.Attr{}) {
+		return buf
+	}
+	// Indent 4 spaces per level.
+	buf = fmt.Appendf(buf, "%*s", indentLevel*4, "")
+	switch a.Value.Kind() {
+	case slog.KindString:
+		// Quote string values, to make them easy to parse.
+		buf = fmt.Appendf(buf, "%s: %q\n", a.Key, a.Value.String())
+	case slog.KindTime:
+		// Write times in a standard way, without the monotonic time.
+		buf = fmt.Appendf(buf, "%s: %s\n", a.Key, a.Value.Time().Format(time.RFC3339Nano))
+	case slog.KindGroup:
+		attrs := a.Value.Group()
+		// Ignore empty groups.
+		if len(attrs) == 0 {
+			return buf
+		}
+		// If the key is non-empty, write it out and indent the rest of the attrs.
+		// Otherwise, inline the attrs.
+		if a.Key != "" {
+			buf = fmt.Appendf(buf, "%s:\n", a.Key)
+			indentLevel++
+		}
+		for _, ga := range attrs {
+			buf = h.appendAttr(buf, ga, indentLevel)
+		}
+	default:
+		buf = fmt.Appendf(buf, "%s: %s\n", a.Key, a.Value)
+	}
+	return buf
+}
+```
+
+It begins by resolving the attribute, to run the `LogValuer.LogValue` method of
+the value if it has one. All handlers should resolve every attribute they
+process.
+
+Next, it follows the handler rule that says that empty attributes should be
+ignored.
+
+Then it switches on the attribute kind to determine what format to use. For most
+(the default case of the switch), it relies on `slog.Value`'s `String` method to
+produce something reasonable. It handles strings and times specially:
+strings by quoting them, and times by formatting them in a standard way.
+
+When `appendAttr` sees a `Group`, it calls itself recursively on the group's
+attributes, after applying two more handler rules.
+First, a group with no attributes is ignored&emdash;not even its key is displayed.
+Second, a group with an empty key is inlined: the group boundary isn't marked in
+any way. In our case, that means the group's attributes aren't indented.
 
 ## The `WithAttrs` method
 
