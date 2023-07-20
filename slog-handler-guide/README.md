@@ -325,13 +325,13 @@ Next, it follows the handler rule that says that empty attributes should be
 ignored.
 
 Then it switches on the attribute kind to determine what format to use. For most
-(the default case of the switch), it relies on `slog.Value`'s `String` method to
+kinds (the default case of the switch), it relies on `slog.Value`'s `String` method to
 produce something reasonable. It handles strings and times specially:
 strings by quoting them, and times by formatting them in a standard way.
 
 When `appendAttr` sees a `Group`, it calls itself recursively on the group's
 attributes, after applying two more handler rules.
-First, a group with no attributes is ignored&emdash;not even its key is displayed.
+First, a group with no attributes is ignored&mdash;not even its key is displayed.
 Second, a group with an empty key is inlined: the group boundary isn't marked in
 any way. In our case, that means the group's attributes aren't indented.
 
@@ -360,8 +360,7 @@ the original handler (its receiver) unchanged. For example, this call:
 creates a new logger, `logger2`, with an additional attribute, but has no
 effect on `logger1`.
 
-
-We will show an example implementation of `WithAttrs` below, when we discuss `WithGroup`.
+We will show example implementations of `WithAttrs` below, when we discuss `WithGroup`.
 
 ## The `WithGroup` method
 
@@ -390,7 +389,128 @@ the implementations of `Handler.WithGroup` and `Handler.WithAttrs`.
 We will look at two implementations of `WithGroup` and `WithAttrs`, one that pre-formats and
 one that doesn't.
 
-TODO(jba): add IndentHandler examples
+### Without pre-formatting
+
+Our first implementation will collect the information from `WithGroup` and
+`WithAttrs` calls to build up a slice of group names and attribute lists,
+and loop over that slice in `Handle`. We start with a struct that can hold
+either a group name or some attributes:
+
+```
+// groupOrAttrs holds either a group name or a list of slog.Attrs.
+type groupOrAttrs struct {
+	group string      // group name if non-empty
+	attrs []slog.Attr // attrs if non-empty
+}
+```
+
+Then we add a slice of `groupOrAttrs` to our handler:
+
+```
+type IndentHandler struct {
+	opts Options
+	goas []groupOrAttrs
+	mu   *sync.Mutex
+	out  io.Writer
+}
+```
+
+As stated above, The `WithGroup` and `WithAttrs` methods should not modify their
+receiver.
+To that end, we define a method that will copy our handler struct
+and append one `groupOrAttrs` to the copy:
+
+```
+func (h *IndentHandler) withGroupOrAttrs(goa groupOrAttrs) *IndentHandler {
+	h2 := *h
+	h2.goas = make([]groupOrAttrs, len(h.goas)+1)
+	copy(h2.goas, h.goas)
+	h2.goas[len(h2.goas)-1] = goa
+	return &h2
+}
+```
+
+Most of the fields of `IndentHandler` can be copied shallowly, but the slice of
+`groupOrAttrs` requires a deep copy, or the clone and the original will point to
+the same underlying array. If we used `append` instead of making an explicit
+copy, we would introduce that subtle aliasing bug.
+
+Using `withGroupOrAttrs`, the `With` methods are easy:
+
+```
+func (h *IndentHandler) WithGroup(name string) slog.Handler {
+	if name == "" {
+		return h
+	}
+	return h.withGroupOrAttrs(groupOrAttrs{group: name})
+}
+
+func (h *IndentHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	if len(attrs) == 0 {
+		return h
+	}
+	return h.withGroupOrAttrs(groupOrAttrs{attrs: attrs})
+}
+```
+
+The `Handle` method can now process the groupOrAttrs slice after
+the built-in attributes and before the ones in the record:
+
+```
+func (h *IndentHandler) Handle(ctx context.Context, r slog.Record) error {
+	buf := make([]byte, 0, 1024)
+	if !r.Time.IsZero() {
+		buf = h.appendAttr(buf, slog.Time(slog.TimeKey, r.Time), 0)
+	}
+	buf = h.appendAttr(buf, slog.Any(slog.LevelKey, r.Level), 0)
+	if r.PC != 0 {
+		fs := runtime.CallersFrames([]uintptr{r.PC})
+		f, _ := fs.Next()
+		buf = h.appendAttr(buf, slog.String(slog.SourceKey, fmt.Sprintf("%s:%d", f.File, f.Line)), 0)
+	}
+	buf = h.appendAttr(buf, slog.String(slog.MessageKey, r.Message), 0)
+	indentLevel := 0
+	// Handle state from WithGroup and WithAttrs.
+	goas := h.goas
+	if r.NumAttrs() == 0 {
+		// If the record has no Attrs, remove groups at the end of the list; they are empty.
+		for len(goas) > 0 && goas[len(goas)-1].group != "" {
+			goas = goas[:len(goas)-1]
+		}
+	}
+	for _, goa := range goas {
+		if goa.group != "" {
+			buf = fmt.Appendf(buf, "%*s%s:\n", indentLevel*4, "", goa.group)
+			indentLevel++
+		} else {
+			for _, a := range goa.attrs {
+				buf = h.appendAttr(buf, a, indentLevel)
+			}
+		}
+	}
+	r.Attrs(func(a slog.Attr) bool {
+		buf = h.appendAttr(buf, a, indentLevel)
+		return true
+	})
+	buf = append(buf, "---\n"...)
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	_, err := h.out.Write(buf)
+	return err
+}
+```
+
+You may have noticed that our algorithm for
+recording `WithGroup` and `WithAttrs` information is quadratic in the
+number of calls to those methods, because of the repeated copying.
+That is unlikely to matter in practice, but if it bothers you,
+you can use a linked list instead,
+which `Handle` will have to reverse or visit recursively.
+See [github.com/jba/slog/withsupport](https://github.com/jba/slog/withsupport) for an implementation.
+
+### With pre-formatting
+
+TODO(jba): write
 
 ## Testing
 
@@ -465,7 +585,7 @@ to format a value will probably switch on the value's kind:
 What should happen in the default case, when the handler encounters a `Kind`
 that it doesn't know about?
 The built-in handlers try to muddle through by using the result of the value's
-`String` method.
+`String` method, as our example handler does.
 They do not panic or return an error.
 Your own handlers might in addition want to report the problem through your production monitoring
 or error-tracking telemetry system.
