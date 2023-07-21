@@ -510,7 +510,174 @@ See [github.com/jba/slog/withsupport](https://github.com/jba/slog/withsupport) f
 
 ### With pre-formatting
 
-TODO(jba): write
+Our second implementation implements pre-formatting.
+This implementation is more complicated than the previous one.
+Is the extra complexity worth it?
+That depends on your circumstances, but here is one circumstance where
+it might be.
+Say that you wanted your server to log a lot of information about an incoming
+request with every log message that happens during that request. A typical
+handler might look something like this:
+
+    func (s *Server) handleWidgets(w http.ResponseWriter, r *http.Request) {
+        logger := s.logger.With(
+            "url", r.URL,
+            "traceID": r.Header.Get("X-Cloud-Trace-Context"),
+            // many other attributes
+            )
+        // ...
+    }
+
+A single handleWidgets request might generate hundreds of log lines.
+For instance, it might contain code like this:
+
+    for _, w := range widgets {
+        logger.Info("processing widget", "name", w.Name)
+        // ...
+    }
+
+For every such line, the `Handle` method we wrote above will format all
+the attributes that were added using `With` above, in addition to the
+ones on the log line itself.
+
+Maybe all that extra work doesn't slow down your server significantly, because
+it does so much other work that time spent logging is just noise.
+But perhaps your server is fast enough that all that extra formatting appears high up
+in your CPU profiles. That is when pre-formatting can make a big difference,
+by formatting the attributes in a call to `With` just once.
+
+To pre-format the arguments to `WithAttrs`, we need to keep track of some
+additional state in the `IndentHandler` struct.
+
+```
+type IndentHandler struct {
+	opts           Options
+	preformatted   []byte   // data from WithGroup and WithAttrs
+	unopenedGroups []string // groups from WithGroup that haven't been opened
+	indentLevel    int      // same as number of opened groups so far
+	mu             *sync.Mutex
+	out            io.Writer
+}
+```
+
+Mainly, we need a buffer to hold the pre-formatted data.
+But we also need to keep track of which groups
+we've seen but haven't output yet. We'll call those groups "unopened."
+We also need to track how many groups we've opened, which we can do
+with a simple counter, since an opened group's only effect is to change the
+indentation level.
+
+The `WithGroup` implementation is a lot like the previous one: just remember the
+new group, which is unopened initially.
+
+```
+func (h *IndentHandler) WithGroup(name string) slog.Handler {
+	if name == "" {
+		return h
+	}
+	h2 := *h
+	// Add an unopened group to h2 without modifying h.
+	h2.unopenedGroups = make([]string, len(h.unopenedGroups)+1)
+	copy(h2.unopenedGroups, h.unopenedGroups)
+	h2.unopenedGroups[len(h2.unopenedGroups)-1] = name
+	return &h2
+}
+```
+
+`WithAttrs` does all the pre-formatting:
+
+```
+func (h *IndentHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	if len(attrs) == 0 {
+		return h
+	}
+	h2 := *h
+	// Force an append to copy the underlying array.
+	pre := slices.Clip(h.preformatted)
+	// Add all groups from WithGroup that haven't already been added.
+	h2.preformatted = h2.appendUnopenedGroups(pre, h2.indentLevel)
+	// Each of those groups increased the indent level by 1.
+	h2.indentLevel += len(h2.unopenedGroups)
+	// Now all groups have been opened.
+	h2.unopenedGroups = nil
+	// Pre-format the attributes.
+	for _, a := range attrs {
+		h2.preformatted = h2.appendAttr(h2.preformatted, a, h2.indentLevel)
+	}
+	return &h2
+}
+
+func (h *IndentHandler) appendUnopenedGroups(buf []byte, indentLevel int) []byte {
+	for _, g := range h.unopenedGroups {
+		buf = fmt.Appendf(buf, "%*s%s:\n", indentLevel*4, "", g)
+		indentLevel++
+	}
+	return buf
+}
+```
+
+It first opens any unopened groups. This handles calls like:
+
+    logger.WithGroup("g").WithGroup("h").With("a", 1)
+
+Here, `WithAttrs` must output "g" and "h" before "a". Since a group established
+by `WithGroup` is in effect for the rest of the log line, `WithAttrs` increments
+the indentation level for each group it opens.
+
+Lastly, `WithAttrs` formats its argument attributes, using the same `appendAttr`
+method we saw above.
+
+It's the `Handle` method's job to insert the pre-formatted material in the right
+place, which is after the built-in attributes and before the ones in the record:
+
+```
+func (h *IndentHandler) Handle(ctx context.Context, r slog.Record) error {
+	buf := make([]byte, 0, 1024)
+	if !r.Time.IsZero() {
+		buf = h.appendAttr(buf, slog.Time(slog.TimeKey, r.Time), 0)
+	}
+	buf = h.appendAttr(buf, slog.Any(slog.LevelKey, r.Level), 0)
+	if r.PC != 0 {
+		fs := runtime.CallersFrames([]uintptr{r.PC})
+		f, _ := fs.Next()
+		buf = h.appendAttr(buf, slog.String(slog.SourceKey, fmt.Sprintf("%s:%d", f.File, f.Line)), 0)
+	}
+	buf = h.appendAttr(buf, slog.String(slog.MessageKey, r.Message), 0)
+	// Insert preformatted attributes just after built-in ones.
+	buf = append(buf, h.preformatted...)
+	if r.NumAttrs() > 0 {
+		buf = h.appendUnopenedGroups(buf, h.indentLevel)
+		r.Attrs(func(a slog.Attr) bool {
+			buf = h.appendAttr(buf, a, h.indentLevel+len(h.unopenedGroups))
+			return true
+		})
+	}
+	buf = append(buf, "---\n"...)
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	_, err := h.out.Write(buf)
+	return err
+}
+```
+
+It must also open any groups that haven't yet been opened. The logic covers
+log lines like this one:
+
+    logger.WithGroup("g").Info("msg", "a", 1)
+
+where "g" is unopened before `Handle` is called and must be written to produce
+the correct output:
+
+    level: INFO
+    msg: "msg"
+    g:
+        a: 1
+
+The check for `r.NumAttrs() > 0` handles this case:
+
+    logger.WithGroup("g").Info("msg")
+
+Here there are no record attributes, so no group to open.
 
 ## Testing
 
