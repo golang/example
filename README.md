@@ -21,6 +21,8 @@ $ go build
 ```
 A trivial "Hello, world" program that uses a stringutil package.
 
+I'm here
+
 Command [hello](hello/) covers:
 
 * The basic form of an executable command
