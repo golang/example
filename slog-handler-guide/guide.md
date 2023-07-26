@@ -612,6 +612,102 @@ error.
 
 ## Speed
 
-TODO(jba): discuss
+Most programs don't need fast logging.
+Before making your handler fast, gather data&mdash;preferably production data,
+not benchmark comparisons&mdash;that demonstrates that it needs to be fast.
+Avoid premature optimization.
 
-TODO(jba): show how to pool a []byte.
+If you need a fast handler, start with pre-formatting. It may provide dramatic
+speed-ups in cases where a single call to `Logger.With` is followed by many
+calls to the resulting logger.
+
+If log output is the bottleneck, consider making your handler asynchronous.
+Do the minimal amount of processing in the handler, then send the record and
+other information over a channel. Another goroutine can collect the incoming log
+entries and write them in bulk and in the background.
+You might want to preserve the option to log synchronously
+so you can see all the log output to debug a crash.
+
+Allocation is often a major cause of a slow system.
+The `slog` package already works hard at minimizing allocations.
+If your handler does its own allocation, and profiling shows it to be
+a problem, then see if you can minimize it.
+
+One simple change you can make is to replace calls to `fmt.Sprintf` or `fmt.Appendf`
+with direct appends to the buffer. For example, our IndentHandler appends string
+attributes to the buffer like so:
+
+	buf = fmt.Appendf(buf, "%s: %q\n", a.Key, a.Value.String())
+
+As of Go 1.21, that results in two allocations, one for each argument passed to
+an `any` parameter. We can get that down to zero by using `append` directly:
+
+	buf = append(buf, a.Key...)
+	buf = append(buf, ": "...)
+	buf = strconv.AppendQuote(buf, a.Value.String())
+	buf = append(buf, '\n')
+
+Another worthwhile change is to use a `sync.Pool` to manage the one chunk of
+memory that most handlers need:
+the `[]byte` buffer holding the formatted output.
+
+Our example `Handle` method began with this line:
+
+	buf := make([]byte, 0, 1024)
+
+As we said above, providing a large initial capacity avoids repeated copying and
+re-allocation of the slice as it grows, reducing the number of allocations to
+one.
+But we can get it down to zero in the steady state by keeping a global pool of buffers.
+Initially, the pool will be empty and new buffers will be allocated.
+But eventually, assuming the number of concurrent log calls reaches a steady
+maximum, there will be enough buffers in the pool to share among all the
+ongoing `Handler` calls. As long as no log entry grows past a buffer's capacity,
+there will be no allocations from the garbage collector's point of view.
+
+We will hide our pool behind a pair of functions, `allocBuf` and `freeBuf`.
+The single line to get a buffer at the top of `Handle` becomes two lines:
+
+	bufp := allocBuf()
+	defer freeBuf(bufp)
+
+One of the subtleties involved in making a `sync.Pool` of slices
+is suggested by the variable name `bufp`: your pool must deal in
+_pointers_ to slices, not the slices themselves.
+Pooled values must always be pointers. If they aren't, then the `any` arguments
+and return values of the `sync.Pool` methods will themselves cause allocations,
+defeating the purpose of pooling.
+
+There are two ways to proceed with our slice pointer: we can replace `buf`
+with `*bufp` throughout our function, or we can dereference it and remember to
+re-assign it before freeing:
+
+	bufp := allocBuf()
+	buf := *bufp
+	defer func() {
+		*bufp = buf
+		freeBuf(bufp)
+	}()
+
+
+Here is our pool and its associated functions:
+
+%include indenthandler4/indent_handler.go pool -
+
+The pool's `New` function does the same thing as the original code:
+create a byte slice with 0 length and plenty of capacity.
+The `allocBuf` function just type-asserts the result of the pool's
+`Get` method.
+
+The `freeBuf` method truncates the buffer before putting it back
+in the pool, so that `allocBuf` always returns zero-length slices.
+It also implements an important optimization: it doesn't return
+large buffers to the pool.
+To see why this important, consider what would happen if there were a single,
+unusually large log entry&mdash;say one that was a megabyte when formatted.
+If that megabyte-sized buffer were put in the pool, it could remain
+there indefinitely, constantly being reused, but with most of its capacity
+wasted.
+The extra memory might never be used again by the handler, and since it was in
+the handler's pool, it might never be garbage-collected for reuse elsewhere.
+We can avoid that situation by keeping large buffers out of the pool.
