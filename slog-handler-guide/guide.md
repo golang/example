@@ -485,7 +485,44 @@ in 65 lines.
 
 # General considerations
 
-TODO(jba): reintroduce the material on Record.Clone that used to be here.
+## Copying records
+
+Most handlers won't need to copy the `slog.Record` that is passed
+to the `Handle` method.
+Those that do must take special care in some cases.
+
+A handler can make a single copy of a `Record` with an ordinary Go
+assignment, channel send or function call if it doesn't retain the
+original.
+But if its actions result in more than one copy, it should call `Record.Clone`
+to make the copies so that they don't share state.
+This `Handle` method passes the record to a single handler, so it doesn't require `Clone`:
+
+    type Handler1 struct {
+        h slog.Handler
+        // ...
+    }
+
+    func (h *Handler1) Handle(ctx context.Context, r slog.Record) error {
+        return h.h.Handle(ctx, r)
+    }
+
+This `Handle` method might pass the record to more than one handler, so it
+should use `Clone`:
+
+    type Handler2 struct {
+        hs []slog.Handler
+        // ...
+    }
+
+    func (h *Handler2) Handle(ctx context.Context, r slog.Record) error {
+        for _, hh := range h.hs {
+            if err := hh.Handle(ctx, r.Clone()); err != nil {
+                return err
+            }
+        }
+        return nil
+    }
 
 ## Concurrency safety
 
