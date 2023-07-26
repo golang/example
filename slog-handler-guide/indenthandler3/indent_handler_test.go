@@ -3,29 +3,28 @@
 package indenthandler
 
 import (
-	"bufio"
 	"bytes"
-	"fmt"
+	"log/slog"
 	"reflect"
 	"regexp"
-	"strconv"
-	"strings"
 	"testing"
 	"testing/slogtest"
-	"unicode"
 
-	"log/slog"
+	"gopkg.in/yaml.v3"
 )
 
+// !+TestSlogtest
 func TestSlogtest(t *testing.T) {
 	var buf bytes.Buffer
 	err := slogtest.TestHandler(New(&buf, nil), func() []map[string]any {
-		return parseLogEntries(buf.String())
+		return parseLogEntries(t, buf.Bytes())
 	})
 	if err != nil {
 		t.Error(err)
 	}
 }
+
+// !-TestSlogtest
 
 func Test(t *testing.T) {
 	var buf bytes.Buffer
@@ -56,71 +55,22 @@ d: "NO"
 	}
 }
 
-func parseLogEntries(s string) []map[string]any {
+// !+parseLogEntries
+func parseLogEntries(t *testing.T, data []byte) []map[string]any {
+	entries := bytes.Split(data, []byte("---\n"))
+	entries = entries[:len(entries)-1] // last one is empty
 	var ms []map[string]any
-	scan := bufio.NewScanner(strings.NewReader(s))
-	for scan.Scan() {
-		m := parseGroup(scan)
+	for _, e := range entries {
+		var m map[string]any
+		if err := yaml.Unmarshal([]byte(e), &m); err != nil {
+			t.Fatal(err)
+		}
 		ms = append(ms, m)
-	}
-	if scan.Err() != nil {
-		panic(scan.Err())
 	}
 	return ms
 }
 
-func parseGroup(scan *bufio.Scanner) map[string]any {
-	m := map[string]any{}
-	groupIndent := -1
-	for {
-		line := scan.Text()
-		if line == "---" { // end of entry
-			break
-		}
-		k, v, found := strings.Cut(line, ":")
-		if !found {
-			panic(fmt.Sprintf("no ':' in line %q", line))
-		}
-		indent := strings.IndexFunc(k, func(r rune) bool {
-			return !unicode.IsSpace(r)
-		})
-		if indent < 0 {
-			panic("blank line")
-		}
-		if groupIndent < 0 {
-			// First line in group; remember the indent.
-			groupIndent = indent
-		} else if indent < groupIndent {
-			// End of group
-			break
-		} else if indent > groupIndent {
-			panic(fmt.Sprintf("indent increased on line %q", line))
-		}
-
-		key := strings.TrimSpace(k)
-		if v == "" {
-			// Just a key: start of a group.
-			if !scan.Scan() {
-				panic("empty group")
-			}
-			m[key] = parseGroup(scan)
-		} else {
-			v = strings.TrimSpace(v)
-			if len(v) > 0 && v[0] == '"' {
-				var err error
-				v, err = strconv.Unquote(v)
-				if err != nil {
-					panic(err)
-				}
-			}
-			m[key] = v
-			if !scan.Scan() {
-				break
-			}
-		}
-	}
-	return m
-}
+// !-parseLogEntries
 
 func TestParseLogEntries(t *testing.T) {
 	in := `
@@ -129,7 +79,7 @@ b: 2
 c: 3
 g:
     h: 4
-    i: 5
+    i: five
 d: 6
 ---
 e: 7
@@ -137,20 +87,20 @@ e: 7
 `
 	want := []map[string]any{
 		{
-			"a": "1",
-			"b": "2",
-			"c": "3",
+			"a": 1,
+			"b": 2,
+			"c": 3,
 			"g": map[string]any{
-				"h": "4",
-				"i": "5",
+				"h": 4,
+				"i": "five",
 			},
-			"d": "6",
+			"d": 6,
 		},
 		{
-			"e": "7",
+			"e": 7,
 		},
 	}
-	got := parseLogEntries(in[1:])
+	got := parseLogEntries(t, []byte(in[1:]))
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("\ngot:\n%v\nwant:\n%v", got, want)
 	}

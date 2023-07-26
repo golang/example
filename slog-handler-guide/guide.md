@@ -449,14 +449,43 @@ Here there are no record attributes, so no group to open.
 
 ## Testing
 
+The [`Handler` contract](https://pkg.go.dev/log/slog#Handler) specifies several
+constraints on handlers.
 To verify that your handler follows these rules and generally produces proper
-output, use the [testing/slogtest package](https://pkg.go.dev/log/slog).
+output, use the [testing/slogtest package](https://pkg.go.dev/testing/slogtest).
 
-TODO(jba): show the test function.
+That package's `TestHandler` function takes an instance of your handler and
+a function that returns its output formatted as a slice of maps. Here is the test function
+for our example handler:
 
-TODO(jba): reintroduce the material on Record.Clone that used to be here.
+%include indenthandler3/indent_handler_test.go TestSlogtest -
+
+Calling `TestHandler` is easy. The hard part is parsing the output.
+`TestHandler` calls your handler multiple times, resulting in a sequence of log
+entries.
+It is your job to parse each entry into a `map[string]any`.
+A group in an entry should appear as a nested map.
+
+If your handler outputs a standard format, you can use an existing parser.
+For example, if your handler outputs one JSON object per line, then you
+can split the output into lines and call `encoding/json.Unmarshal` on each.
+Parsers for other formats that can unmarshal into a map can be used out
+of the box.
+Our example output is enough like YAML so that we can use the `gopkg.in/yaml.v3`
+package to parse it:
+
+%include indenthandler3/indent_handler_test.go parseLogEntries -
+
+If you have to write your own parser, it can be far from perfect.
+The `slogtest` package uses only a handful of simple attributes.
+(It is testing handler conformance, not parsing.)
+Your parser can ignore edge cases like whitespace and newlines in keys and
+values. Before switching to a YAML parser, we wrote an adequate custom parser
+in 65 lines.
 
 # General considerations
+
+TODO(jba): reintroduce the material on Record.Clone that used to be here.
 
 ## Concurrency safety
 
