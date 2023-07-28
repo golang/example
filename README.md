@@ -13,21 +13,25 @@ $ cd example
 ```
 https://go.googlesource.com/example is the canonical Git repository.
 It is mirrored at https://github.com/golang/example.
-## [hello](hello/) and [stringutil](stringutil/)
+
+## [hello](hello/) and [hello/reverse](hello/reverse/)
 
 ```
 $ cd hello
 $ go build
+$ ./hello -help
 ```
-A trivial "Hello, world" program that uses a stringutil package.
+A trivial "Hello, world" program that uses a library package.
 
-Command [hello](hello/) covers:
+The [hello](hello/) command covers:
 
 * The basic form of an executable command
 * Importing packages (from the standard library and the local repository)
 * Printing strings ([fmt](//golang.org/pkg/fmt/))
+* Command-line flags ([flag](//golang.org/pkg/flag/))
+* Logging ([log](//golang.org/pkg/log/))
 
-Library [stringutil](stringutil/) covers:
+The [reverse](hello/reverse/) reverse covers:
 
 * The basic form of a library
 * Conversion between string and []rune
@@ -37,7 +41,7 @@ Library [stringutil](stringutil/) covers:
 
 ```
 $ cd outyet
-$ go build
+$ go run .
 ```
 A web server that answers the question: "Is Go 1.x out yet?"
 

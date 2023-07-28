@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package stringutil
+package reverse
 
 import "testing"
 
-func TestReverse(t *testing.T) {
+func TestString(t *testing.T) {
 	for _, c := range []struct {
 		in, want string
 	}{
@@ -14,9 +14,9 @@ func TestReverse(t *testing.T) {
 		{"Hello, 世界", "界世 ,olleH"},
 		{"", ""},
 	} {
-		got := Reverse(c.in)
+		got := String(c.in)
 		if got != c.want {
-			t.Errorf("Reverse(%q) == %q, want %q", c.in, got, c.want)
+			t.Errorf("String(%q) == %q, want %q", c.in, got, c.want)
 		}
 	}
 }
