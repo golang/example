@@ -37,6 +37,21 @@ The [reverse](hello/reverse/) reverse covers:
 * Conversion between string and []rune
 * Table-driven unit tests ([testing](//golang.org/pkg/testing/))
 
+## [helloserver](helloserver/)
+
+```
+$ cd helloserver
+$ go run .
+```
+
+A trivial "Hello, world" web server.
+
+Topics covered:
+
+* Command-line flags ([flag](//golang.org/pkg/flag/))
+* Logging ([log](//golang.org/pkg/log/))
+* Web servers ([net/http](//golang.org/pkg/net/http/))
+
 ## [outyet](outyet/)
 
 ```
