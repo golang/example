@@ -31,7 +31,7 @@ such as gathering key-value pairs into `Attr`s, and then call one or more
 and the output methods.
 
 An output method fulfills the main role of a logger: producing log output.
-Here is an example call to an output method:
+Here is a call to an output method:
 
     logger.Info("hello", "key", value)
 
@@ -56,7 +56,6 @@ A logger's `With` method calls its handler's `WithAttrs` method.
 
 The `WithGroup` method is used to avoid avoid key collisions in large programs
 by establishing separate namespaces.
-
 This call creates a new `Logger` value with a group named "g":
 
     logger = logger.WithGroup("g")
@@ -102,8 +101,8 @@ and the `New` function that constructs it from an `io.Writer` and options:
 
 We'll support only one option, the ability to set a minimum level in order to
 supress detailed log output.
-Handlers should always use the `slog.Leveler` type for this option.
-`Leveler` is implemented by both `Level` and `LevelVar`.
+Handlers should always declare this option to be a `slog.Leveler`.
+The `slog.Leveler` interface is implemented by both `Level` and `LevelVar`.
 A `Level` value is easy for the user to provide,
 but changing the level of multiple handlers requires tracking them all.
 If the user instead passes a `LevelVar`, then a single change to that `LevelVar`
@@ -178,7 +177,7 @@ groups established by `WithGroup`.
 
 5. Output the buffer.
 
-That is how our `IndentHandler`'s `Handle` method is structured:
+That is how `IndentHandler.Handle` is structured:
 
 %include indenthandler1/indent_handler.go handle -
 
@@ -373,7 +372,7 @@ handler might look something like this:
         // ...
     }
 
-A single handleWidgets request might generate hundreds of log lines.
+A single `handleWidgets` request might generate hundreds of log lines.
 For instance, it might contain code like this:
 
     for _, w := range widgets {
@@ -460,7 +459,7 @@ for our example handler:
 
 %include indenthandler3/indent_handler_test.go TestSlogtest -
 
-Calling `TestHandler` is easy. The hard part is parsing the output.
+Calling `TestHandler` is easy. The hard part is parsing your handler's output.
 `TestHandler` calls your handler multiple times, resulting in a sequence of log
 entries.
 It is your job to parse each entry into a `map[string]any`.
@@ -569,8 +568,7 @@ like an invalid argument, is to panic or return an error.
 The built-in handlers do not follow that advice.
 Few things are more frustrating than being unable to debug a problem that
 causes logging to fail;
-our feeling is that it is
-better to produce some output, however imperfect, than to produce none at all.
+it is better to produce some output, however imperfect, than to produce none at all.
 That is why methods like `Logger.Info` convert programming bugs in their list of
 key-value pairs, like missing values or malformed keys,
 into `Attr`s that contain as much information as possible.
@@ -596,7 +594,7 @@ The most likely explanation for the issue is that a newer version of the `slog` 
 a new `Kind`&mdash;a backwards-compatible change under the Go 1 Compatibility
 Promise&mdash;and the handler wasn't updated.
 That is certainly a problem, but it shouldn't deprive
-readers of the logs from seeing the rest of the output.
+readers from seeing the rest of the log output.
 
 There is one circumstance where returning an error from `Handler.Handle` is appropriate.
 If the output operation itself fails, the best course of action is to report
