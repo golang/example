@@ -708,4 +708,4 @@ there indefinitely, constantly being reused, but with most of its capacity
 wasted.
 The extra memory might never be used again by the handler, and since it was in
 the handler's pool, it might never be garbage-collected for reuse elsewhere.
-We can avoid that situation by keeping large buffers out of the pool.
+We can avoid that situation by excluding large buffers from the pool.

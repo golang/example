@@ -910,7 +910,7 @@ so you can see all the log output to debug a crash.
 
 Allocation is often a major cause of a slow system.
 The `slog` package already works hard at minimizing allocations.
-If your handler does it own allocation, and profiling shows it to be
+If your handler does its own allocation, and profiling shows it to be
 a problem, then see if you can minimize it.
 
 One simple change you can make is to replace calls to `fmt.Sprintf` or `fmt.Appendf`
@@ -1010,4 +1010,4 @@ there indefinitely, constantly being reused, but with most of its capacity
 wasted.
 The extra memory might never be used again by the handler, and since it was in
 the handler's pool, it might never be garbage-collected for reuse elsewhere.
-We can avoid that situation by keeping large buffers out of the pool.
+We can avoid that situation by excluding large buffers from the pool.
