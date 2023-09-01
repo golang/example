@@ -147,6 +147,12 @@ If the user instead passes a `LevelVar`, then a single change to that `LevelVar`
 will change the behavior of all handlers that contain it.
 Changes to `LevelVar`s are goroutine-safe.
 
+You might also consider adding a `ReplaceAttr` option to your handler,
+like the [one for the built-in
+handlers](https://pkg.go.dev/log/slog#HandlerOptions.ReplaceAttr).
+Although `ReplaceAttr` will complicate your implementation, it will also
+make your handler more generally useful.
+
 The mutex will be used to ensure that writes to the `io.Writer` happen atomically.
 Unusually, `IndentHandler` holds a pointer to a `sync.Mutex` rather than holding a
 `sync.Mutex` directly.
@@ -504,7 +510,9 @@ number of calls to those methods, because of the repeated copying.
 That is unlikely to matter in practice, but if it bothers you,
 you can use a linked list instead,
 which `Handle` will have to reverse or visit recursively.
-See [github.com/jba/slog/withsupport](https://github.com/jba/slog/withsupport) for an implementation.
+See the
+[github.com/jba/slog/withsupport](https://github.com/jba/slog/tree/main/withsupport)
+package for an implementation.
 
 #### Getting the mutex right
 
