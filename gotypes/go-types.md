@@ -62,7 +62,7 @@ constant expressions, as we'll see in
 
 
 
-The [`golang.org/x/tools/go/loader` package](https://pkg.go.dev/golang.org/x/tools/go/loader)
+The [`golang.org/x/tools/go/packages` package](https://pkg.go.dev/golang.org/x/tools/go/packages)
 from the `x/tools` repository is a client of the type
 checker that loads, parses, and type-checks a complete Go program from
 source code.
@@ -1850,25 +1850,28 @@ ran a `go install` or `go build -i` command.
 
 
 
-The [`golang.org/tools/x/go/loader` package](https://pkg.go.dev/golang.org/x/tools/go/loader)
-provides an alternative `Importer` that addresses
-some of these problems.
-It loads a complete program from source, performing
-[`cgo`](https://golang.org/cmd/cgo/cgo) preprocessing if
-necessary, followed by parsing and type-checking.
+The [`golang.org/tools/x/go/packages`
+package](https://pkg.go.dev/golang.org/x/tools/go/packages) provides
+a comprehensive means of loading packages from source.
+It runs `go list` to query the project metadata,
+performs [`cgo`](https://golang.org/cmd/cgo/cgo) preprocessing if necessary,
+reads and parses the source files,
+and optionally type-checks each package.
+It can load a whole program from source, or load just the initial
+packages from source and load all their dependencies from export data.
 It loads independent packages in parallel to hide I/O latency, and
 detects and reports import cycles.
 For each package, it provides the `types.Package` containing the
 package's lexical environment, the list of `ast.File` syntax
 trees for each file in the package, the `types.Info` containing
-type information for each syntax node, and a list of type errors
-associated with that package.
-(Please be aware that the `go/loader` package's API is likely to
-change before it finally stabilizes.)
+type information for each syntax node, a list of type errors
+associated with that package, and other information too.
+Since some of this information is more costly to compute,
+the API allows you to select which parts you need,
+but since this is a tutorial we'll generally request complete
+information so that it is easier to explore.
 
-
-
-The `doc` program below demonstrates a simple use of the loader.
+The `doc` program below demonstrates a simple use of `go/packages`.
 It is a rudimentary implementation of `go doc` that prints the type,
 methods, and documentation of the package-level object specified on
 the command line.
@@ -1881,14 +1884,16 @@ Here's an example:
 Observe that it prints the correct location of each method
 declaration, even though, due to embedding, some of
 `http.File`'s methods were declared in another package.
-Here's the first part of the program, showing how to load an entire
-program starting from the single package, `pkgpath`:
+Here's the first part of the program, showing how to load
+complete type information including typed syntax,
+for a single package `pkgpath`,
+plus exported type information for its dependencies.
 
 
 %include doc/main.go part1
 
 
-Notice that we instructed the parser to retain comments during parsing.
+By default, `go/packages`, instructs the parser to retain comments during parsing.
 The rest of the program prints the output:
 
 
@@ -2035,11 +2040,10 @@ helper function
 [`astutil.PathEnclosingInterval`](https://pkg.go.dev/golang.org/x/tools/go/ast/astutil#PathEnclosingInterval).
 It returns the enclosing `ast.Node`, and all its ancestors up to
 the root of the file.
-You must know which file `*ast.File` the `token.Pos` belongs to.
-Alternatively, you can search an entire program loaded by the
-`loader` package, using
-[`(*loader.Program).PathEnclosingInterval`](https://pkg.go.dev/golang.org/x/tools/go/loader#Program.PathEnclosingInterval).
-
+If you don't know which file `*ast.File` the `token.Pos` belongs to,
+you can iterate over the parsed files of the package and quickly test
+whether its position falls within the file's range,
+from `File.FileStart` to `File.FileEnd`.
 
 
 To map **from an `Object` to its declaring syntax**, call

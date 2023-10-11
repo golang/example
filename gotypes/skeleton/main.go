@@ -20,7 +20,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"golang.org/x/tools/go/loader"
+	"golang.org/x/tools/go/packages"
 )
 
 const usage = "Usage: skeleton <package> <interface> <concrete>"
@@ -76,15 +76,16 @@ func main() {
 	}
 	pkgpath, ifacename, concname := os.Args[1], os.Args[2], os.Args[3]
 
-	// The loader loads a complete Go program from source code.
-	var conf loader.Config
-	conf.Import(pkgpath)
-	lprog, err := conf.Load()
+	// Load only exported type information for the specified package.
+	conf := &packages.Config{Mode: packages.NeedTypes}
+	pkgs, err := packages.Load(conf, pkgpath)
 	if err != nil {
-		log.Fatal(err) // load error
+		log.Fatal(err) // failed to load anything
 	}
-	pkg := lprog.Package(pkgpath).Pkg
-	if err := PrintSkeleton(pkg, ifacename, concname); err != nil {
+	if packages.PrintErrors(pkgs) > 0 {
+		os.Exit(1) // some packages contained errors
+	}
+	if err := PrintSkeleton(pkgs[0].Types, ifacename, concname); err != nil {
 		log.Fatal(err)
 	}
 }

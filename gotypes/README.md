@@ -86,7 +86,7 @@ constant expressions, as we'll see in
 
 
 
-The [`golang.org/x/tools/go/loader` package](https://pkg.go.dev/golang.org/x/tools/go/loader)
+The [`golang.org/x/tools/go/packages` package](https://pkg.go.dev/golang.org/x/tools/go/packages)
 from the `x/tools` repository is a client of the type
 checker that loads, parses, and type-checks a complete Go program from
 source code.
@@ -2190,13 +2190,11 @@ programs.
 ```
 var bytesFlag = flag.Int("bytes", 48, "maximum parameter size in bytes")
 
-var sizeof = (&types.StdSizes{8, 8}).Sizeof // the sizeof function
-
-func PrintHugeParams(fset *token.FileSet, info *types.Info, files []*ast.File) {
+func PrintHugeParams(fset *token.FileSet, info *types.Info, sizes types.Sizes, files []*ast.File) {
 	checkTuple := func(descr string, tuple *types.Tuple) {
 		for i := 0; i < tuple.Len(); i++ {
 			v := tuple.At(i)
-			if sz := sizeof(v.Type()); sz > int64(*bytesFlag) {
+			if sz := sizes.Sizeof(v.Type()); sz > int64(*bytesFlag) {
 				fmt.Printf("%s: %q %s: %s = %d bytes\n",
 					fset.Position(v.Pos()),
 					v.Name(), descr, v.Type(), sz)
@@ -2296,25 +2294,28 @@ ran a `go install` or `go build -i` command.
 
 
 
-The [`golang.org/tools/x/go/loader` package](https://pkg.go.dev/golang.org/x/tools/go/loader)
-provides an alternative `Importer` that addresses
-some of these problems.
-It loads a complete program from source, performing
-[`cgo`](https://golang.org/cmd/cgo/cgo) preprocessing if
-necessary, followed by parsing and type-checking.
+The [`golang.org/tools/x/go/packages`
+package](https://pkg.go.dev/golang.org/x/tools/go/packages) provides
+a comprehensive means of loading packages from source.
+It runs `go list` to query the project metadata,
+performs [`cgo`](https://golang.org/cmd/cgo/cgo) preprocessing if necessary,
+reads and parses the source files,
+and optionally type-checks each package.
+It can load a whole program from source, or load just the initial
+packages from source and load all their dependencies from export data.
 It loads independent packages in parallel to hide I/O latency, and
 detects and reports import cycles.
 For each package, it provides the `types.Package` containing the
 package's lexical environment, the list of `ast.File` syntax
 trees for each file in the package, the `types.Info` containing
-type information for each syntax node, and a list of type errors
-associated with that package.
-(Please be aware that the `go/loader` package's API is likely to
-change before it finally stabilizes.)
+type information for each syntax node, a list of type errors
+associated with that package, and other information too.
+Since some of this information is more costly to compute,
+the API allows you to select which parts you need,
+but since this is a tutorial we'll generally request complete
+information so that it is easier to explore.
 
-
-
-The `doc` program below demonstrates a simple use of the loader.
+The `doc` program below demonstrates a simple use of `go/packages`.
 It is a rudimentary implementation of `go doc` that prints the type,
 methods, and documentation of the package-level object specified on
 the command line.
@@ -2324,10 +2325,10 @@ Here's an example:
 ```
 $ ./doc net/http File
 type net/http.File interface{Readdir(count int) ([]os.FileInfo, error); Seek(offset int64, whence int) (int64, error); Stat() (os.FileInfo, error); io.Closer; io.Reader}
-/go/src/io/io.go:92:2: method (net/http.File) Close() error
-/go/src/io/io.go:71:2: method (net/http.File) Read(p []byte) (n int, err error)
+$GOROOT/src/io/io.go:92:2: method (net/http.File) Close() error
+$GOROOT/src/io/io.go:71:2: method (net/http.File) Read(p []byte) (n int, err error)
 /go/src/net/http/fs.go:65:2: method (net/http.File) Readdir(count int) ([]os.FileInfo, error)
-/go/src/net/http/fs.go:66:2: method (net/http.File) Seek(offset int64, whence int) (int64, error)
+$GOROOT/src/net/http/fs.go:66:2: method (net/http.File) Seek(offset int64, whence int) (int64, error)
 /go/src/net/http/fs.go:67:2: method (net/http.File) Stat() (os.FileInfo, error)
 
  A File is returned by a FileSystem's Open method and can be
@@ -2340,8 +2341,10 @@ The methods should behave the same as those on an *os.File.
 Observe that it prints the correct location of each method
 declaration, even though, due to embedding, some of
 `http.File`'s methods were declared in another package.
-Here's the first part of the program, showing how to load an entire
-program starting from the single package, `pkgpath`:
+Here's the first part of the program, showing how to load
+complete type information including typed syntax,
+for a single package `pkgpath`,
+plus exported type information for its dependencies.
 
 
 	// go get golang.org/x/example/gotypes/doc
@@ -2349,24 +2352,28 @@ program starting from the single package, `pkgpath`:
 ```
 pkgpath, name := os.Args[1], os.Args[2]
 
-// The loader loads a complete Go program from source code.
-conf := loader.Config{ParserMode: parser.ParseComments}
-conf.Import(pkgpath)
-lprog, err := conf.Load()
+// Load complete type information for the specified packages,
+// along with type-annotated syntax.
+// Types for dependencies are loaded from export data.
+conf := &packages.Config{Mode: packages.LoadSyntax}
+pkgs, err := packages.Load(conf, pkgpath)
 if err != nil {
-	log.Fatal(err) // load error
+	log.Fatal(err) // failed to load anything
+}
+if packages.PrintErrors(pkgs) > 0 {
+	os.Exit(1) // some packages contained errors
 }
 
 // Find the package and package-level object.
-pkg := lprog.Package(pkgpath).Pkg
-obj := pkg.Scope().Lookup(name)
+pkg := pkgs[0]
+obj := pkg.Types.Scope().Lookup(name)
 if obj == nil {
-	log.Fatalf("%s.%s not found", pkg.Path(), name)
+	log.Fatalf("%s.%s not found", pkg.Types.Path(), name)
 }
 ```
 
 
-Notice that we instructed the parser to retain comments during parsing.
+By default, `go/packages`, instructs the parser to retain comments during parsing.
 The rest of the program prints the output:
 
 
@@ -2376,20 +2383,26 @@ The rest of the program prints the output:
 // Print the object and its methods (incl. location of definition).
 fmt.Println(obj)
 for _, sel := range typeutil.IntuitiveMethodSet(obj.Type(), nil) {
-	fmt.Printf("%s: %s\n", lprog.Fset.Position(sel.Obj().Pos()), sel)
+	fmt.Printf("%s: %s\n", pkg.Fset.Position(sel.Obj().Pos()), sel)
 }
 
 // Find the path from the root of the AST to the object's position.
 // Walk up to the enclosing ast.Decl for the doc comment.
-_, path, _ := lprog.PathEnclosingInterval(obj.Pos(), obj.Pos())
-for _, n := range path {
-	switch n := n.(type) {
-	case *ast.GenDecl:
-		fmt.Println("\n", n.Doc.Text())
-		return
-	case *ast.FuncDecl:
-		fmt.Println("\n", n.Doc.Text())
-		return
+for _, file := range pkg.Syntax {
+	pos := obj.Pos()
+	if !(file.FileStart <= pos && pos < file.FileEnd) {
+		continue // not in this file
+	}
+	path, _ := astutil.PathEnclosingInterval(file, pos, pos)
+	for _, n := range path {
+		switch n := n.(type) {
+		case *ast.GenDecl:
+			fmt.Println("\n", n.Doc.Text())
+			return
+		case *ast.FuncDecl:
+			fmt.Println("\n", n.Doc.Text())
+			return
+		}
 	}
 }
 ```
@@ -2535,11 +2548,10 @@ helper function
 [`astutil.PathEnclosingInterval`](https://pkg.go.dev/golang.org/x/tools/go/ast/astutil#PathEnclosingInterval).
 It returns the enclosing `ast.Node`, and all its ancestors up to
 the root of the file.
-You must know which file `*ast.File` the `token.Pos` belongs to.
-Alternatively, you can search an entire program loaded by the
-`loader` package, using
-[`(*loader.Program).PathEnclosingInterval`](https://pkg.go.dev/golang.org/x/tools/go/loader#Program.PathEnclosingInterval).
-
+If you don't know which file `*ast.File` the `token.Pos` belongs to,
+you can iterate over the parsed files of the package and quickly test
+whether its position falls within the file's range,
+from `File.FileStart` to `File.FileEnd`.
 
 
 To map **from an `Object` to its declaring syntax**, call

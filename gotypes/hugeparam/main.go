@@ -12,20 +12,19 @@ import (
 	"go/token"
 	"go/types"
 	"log"
+	"os"
 
-	"golang.org/x/tools/go/loader"
+	"golang.org/x/tools/go/packages"
 )
 
 // !+
 var bytesFlag = flag.Int("bytes", 48, "maximum parameter size in bytes")
 
-var sizeof = (&types.StdSizes{8, 8}).Sizeof // the sizeof function
-
-func PrintHugeParams(fset *token.FileSet, info *types.Info, files []*ast.File) {
+func PrintHugeParams(fset *token.FileSet, info *types.Info, sizes types.Sizes, files []*ast.File) {
 	checkTuple := func(descr string, tuple *types.Tuple) {
 		for i := 0; i < tuple.Len(); i++ {
 			v := tuple.At(i)
-			if sz := sizeof(v.Type()); sz > int64(*bytesFlag) {
+			if sz := sizes.Sizeof(v.Type()); sz > int64(*bytesFlag) {
 				fmt.Printf("%s: %q %s: %s = %d bytes\n",
 					fset.Position(v.Pos()),
 					v.Name(), descr, v.Type(), sz)
@@ -54,19 +53,20 @@ func PrintHugeParams(fset *token.FileSet, info *types.Info, files []*ast.File) {
 func main() {
 	flag.Parse()
 
-	// The loader loads a complete Go program from source code.
-	var conf loader.Config
-	_, err := conf.FromArgs(flag.Args(), false)
+	// Load complete type information for the specified packages,
+	// along with type-annotated syntax and the "sizeof" function.
+	// Types for dependencies are loaded from export data.
+	conf := &packages.Config{Mode: packages.LoadSyntax}
+	pkgs, err := packages.Load(conf, flag.Args()...)
 	if err != nil {
-		log.Fatal(err) // command syntax error
+		log.Fatal(err) // failed to load anything
 	}
-	lprog, err := conf.Load()
-	if err != nil {
-		log.Fatal(err) // load error
+	if packages.PrintErrors(pkgs) > 0 {
+		os.Exit(1) // some packages contained errors
 	}
 
-	for _, info := range lprog.InitialPackages() {
-		PrintHugeParams(lprog.Fset, &info.Info, info.Files)
+	for _, pkg := range pkgs {
+		PrintHugeParams(pkg.Fset, pkg.TypesInfo, pkg.TypesSizes, pkg.Syntax)
 	}
 }
 
