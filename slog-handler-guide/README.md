@@ -67,7 +67,7 @@ original remains unchanged.
 All subsequent output from `logger` will include those attributes.
 A logger's `With` method calls its handler's `WithAttrs` method.
 
-The `WithGroup` method is used to avoid avoid key collisions in large programs
+The `WithGroup` method is used to avoid key collisions in large programs
 by establishing separate namespaces.
 This call creates a new `Logger` value with a group named "g":
 
