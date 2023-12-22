@@ -13,7 +13,7 @@ This document is maintained by Jonathan Amsterdam `jba@google.com`.
 
 The standard library’s `log/slog` package has a two-part design.
 A "frontend," implemented by the `Logger` type,
-gathers stuctured log information like a message, level, and attributes,
+gathers structured log information like a message, level, and attributes,
 and passes them to a "backend," an implementation of the `Handler` interface.
 The package comes with two built-in handlers that usually should be adequate.
 But you may need to write your own handler, and that is not always straightforward.
@@ -76,7 +76,7 @@ A logger's `WithGroup` method calls its handler's `WithGroup` method.
 
 We can now talk about the four `Handler` methods in detail.
 Along the way, we will write a handler that formats logs using a format
-reminsicent of YAML. It will display this log output call:
+reminiscent of YAML. It will display this log output call:
 
     logger.Info("hello", "key", 23)
 
@@ -100,7 +100,7 @@ and the `New` function that constructs it from an `io.Writer` and options:
 %include indenthandler1/indent_handler.go types -
 
 We'll support only one option, the ability to set a minimum level in order to
-supress detailed log output.
+suppress detailed log output.
 Handlers should always declare this option to be a `slog.Leveler`.
 The `slog.Leveler` interface is implemented by both `Level` and `LevelVar`.
 A `Level` value is easy for the user to provide,
@@ -557,7 +557,7 @@ Beware of facile claims like "Unix writes are atomic"; the situation is a lot mo
 Some handlers have legitimate reasons for keeping state.
 For example, a handler might support a `SetLevel` method to change its configured level
 dynamically.
-Or it might output the time between sucessive calls to `Handle`,
+Or it might output the time between successive calls to `Handle`,
 which requires a mutable field holding the last output time.
 Synchronize all accesses to such fields, both reads and writes.
 

@@ -21,7 +21,7 @@
 //
 // is output, where PACKAGE is constructed from the module path, the
 // base name of the current directory, and the directory of FILENAME.
-// This caption can be supressed by putting "-" as the final word of the %include line.
+// This caption can be suppressed by putting "-" as the final word of the %include line.
 package main
 
 import (
