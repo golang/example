@@ -31,6 +31,8 @@ Weaviate has the be installed locally; the easiest way to do so is by using
 
 * `ragserver`: uses the Google AI Go SDK directly for LLM calls and embeddings,
   and the Weaviate Go client library directly for interacting with Weaviate.
+* `ragserver-langchaingo`: uses [LangChain for Go](https://github.com/tmc/langchaingo)
+  to interact with Weaviate and Google's LLM and embedding models.
 
 ## Usage
 
