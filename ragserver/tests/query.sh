@@ -18,7 +18,7 @@ PAYLOAD=$(echo "{\"content\": \"$QUERY_CONTENT\"}")
 
 # Send the request
 echo "$PAYLOAD" | tr -d "\n" | curl \
-    -X GET \
+    -X POST \
     -H 'Content-Type: application/json' \
     -d @- \
     http://localhost:9020/query/ | sed 's/\\n/\n/g'
