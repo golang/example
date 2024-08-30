@@ -14,7 +14,7 @@ import (
 // readRequestJSON expects req to have a JSON content type with a body that
 // contains a JSON-encoded value complying with the underlying type of target.
 // It populates target, or returns an error.
-func readRequestJSON(target any, req *http.Request) error {
+func readRequestJSON(req *http.Request, target any) error {
 	contentType := req.Header.Get("Content-Type")
 	mediaType, _, err := mime.ParseMediaType(contentType)
 	if err != nil {
@@ -26,14 +26,11 @@ func readRequestJSON(target any, req *http.Request) error {
 
 	dec := json.NewDecoder(req.Body)
 	dec.DisallowUnknownFields()
-	if err := dec.Decode(target); err != nil {
-		return err
-	}
-	return nil
+	return dec.Decode(target)
 }
 
 // renderJSON renders 'v' as JSON and writes it as a response into w.
-func renderJSON(w http.ResponseWriter, v interface{}) {
+func renderJSON(w http.ResponseWriter, v any) {
 	js, err := json.Marshal(v)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -52,7 +52,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /add/", server.addDocumentsHandler)
-	mux.HandleFunc("GET /query/", server.queryHandler)
+	mux.HandleFunc("POST /query/", server.queryHandler)
 
 	port := cmp.Or(os.Getenv("SERVERPORT"), "9020")
 	address := "localhost:" + port
@@ -77,7 +77,7 @@ func (rs *ragServer) addDocumentsHandler(w http.ResponseWriter, req *http.Reques
 	}
 	ar := &addRequest{}
 
-	err := readRequestJSON(ar, req)
+	err := readRequestJSON(req, ar)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -127,7 +127,7 @@ func (rs *ragServer) queryHandler(w http.ResponseWriter, req *http.Request) {
 		Content string
 	}
 	qr := &queryRequest{}
-	err := readRequestJSON(qr, req)
+	err := readRequestJSON(req, qr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
