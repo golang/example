@@ -125,7 +125,7 @@ func (rs *ragServer) queryHandler(w http.ResponseWriter, req *http.Request) {
 		docsContents = append(docsContents, doc.PageContent)
 	}
 
-	// Creata a RAG query for the LLM with the most relevant documents as
+	// Create a RAG query for the LLM with the most relevant documents as
 	// context.
 	ragQuery := fmt.Sprintf(ragTemplateStr, qr.Content, strings.Join(docsContents, "\n"))
 	respText, err := llms.GenerateFromSinglePrompt(rs.ctx, rs.geminiClient, ragQuery, llms.WithModel(generativeModelName))

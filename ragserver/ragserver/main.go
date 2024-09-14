@@ -161,7 +161,7 @@ func (rs *ragServer) queryHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Creata a RAG query for the LLM with the most relevant documents as
+	// Create a RAG query for the LLM with the most relevant documents as
 	// context.
 	ragQuery := fmt.Sprintf(ragTemplateStr, qr.Content, strings.Join(contents, "\n"))
 	resp, err := rs.genModel.GenerateContent(rs.ctx, genai.Text(ragQuery))
