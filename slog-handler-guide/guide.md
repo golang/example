@@ -94,6 +94,11 @@ so it will sometimes produce invalid YAML.
 For example, it doesn't quote keys that have colons in them.
 We'll call it `IndentHandler` to forestall disappointment.
 
+A brief aside before we start: it is tempting to embed `slog.Handler` in your
+custom handler and implement only the methods that you need.
+Loggers and handlers are too tightly coupled for that to work. You should
+implement all four handler methods.
+
 We begin with the `IndentHandler` type
 and the `New` function that constructs it from an `io.Writer` and options:
 
