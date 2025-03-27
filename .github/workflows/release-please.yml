@@ -26,9 +26,10 @@ jobs:
           echo ${{ steps.release.outputs.major }}
           echo ${{ steps.release.outputs.minor }}
           echo ${{ steps.release.outputs.patch }}
-          echo ${{ steps.release.outputs.prs }}
+          echo ${{ steps.release.outputs.pr }}
           echo ${{ steps.release.outputs.prs_created }}
           echo ${{ steps.release.outputs.release_created }}
+      - run: |
           gh auth login --with-token ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
           gh auth status
           
