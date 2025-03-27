@@ -31,7 +31,7 @@ jobs:
         shell: pwsh
         id: extract_release_information
         run: |
-          $output = release-please release-pr --repo-url $GITHUB_REPOSITORY --token=$env:RELEASE_TOKEN
+          $output = release-please github-release --repo-url $GITHUB_REPOSITORY --token=$RELEASE_TOKEN --dry-run
           # Extract the number of releases
           $releasesMatch = [regex]::Match($output, 'Would tag (\d+) releases:')
           if ($releasesMatch.Success) {
