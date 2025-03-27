@@ -23,15 +23,7 @@ jobs:
         with:
           token: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
       - run: |
-          echo ${{ steps.release.outputs.tag_name }}
-          echo ${{ steps.release.outputs.version }}
-          
-          echo ${{ steps.release.outputs.major }}
-          echo ${{ steps.release.outputs.minor }}
-          echo ${{ steps.release.outputs.patch }}
-          echo ${{ steps.release.outputs.pr }}
-          echo ${{ steps.release.outputs.prs_created }}
-          echo ${{ steps.release.outputs.release_created }}
+          echo "PR CREATED:" ${{ steps.release.outputs.prs_created }}
       - run: |
           gh auth status
           
