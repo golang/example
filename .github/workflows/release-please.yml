@@ -76,6 +76,7 @@ jobs:
         env:
           RELEASE_TOKEN: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+      - uses: actions/checkout@v3
       - name: Create Release (Dry Run)
         if: steps.extract_release_information.outputs.release_name
         run: |
