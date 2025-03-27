@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.1.0](https://github.com/takost/go-example/compare/v4.0.6...v4.1.0) (2025-03-27)
+
+
+### Features
+
+* rond varrand ([8777dba](https://github.com/takost/go-example/commit/8777dba85fde3a835e009d584f8af67a53ea3e84))
+
+
+### Bug Fixes
+
+* ci ([d1a0b58](https://github.com/takost/go-example/commit/d1a0b58d0bf7b6cd75624ea2165abc09f502157e))
+* ci ([a7c102a](https://github.com/takost/go-example/commit/a7c102aeec5d1e1ca0bcb2c4e32a6fe073c4d114))
+* skip-release ([2e70608](https://github.com/takost/go-example/commit/2e70608150096a740cb9aa50a66b7f6e7ae90981))
+
 ## [4.0.6](https://github.com/takost/go-example/compare/v4.0.5...v4.0.6) (2025-03-27)
 
 
