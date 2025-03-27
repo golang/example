@@ -24,6 +24,9 @@ jobs:
           token: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
       - run: |
           echo "PR CREATED:" ${{ steps.release.outputs.prs_created }}
+          echo "PR:" ${{ steps.release.outputs.pr }}
+      - run: |
+          echo "PRS" ${{ steps.release.outputs.prs }}
       - run: |
           gh auth status
           
