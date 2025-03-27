@@ -16,7 +16,6 @@ It is mirrored at https://github.com/golang/example.
 
 ## [hello](hello/) and [hello/reverse](hello/reverse/)
 
-
 ```
 $ cd hello
 $ go build
