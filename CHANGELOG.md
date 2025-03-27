@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.3](https://github.com/takost/go-example/compare/v4.0.2...v4.0.3) (2025-03-27)
+
+
+### Bug Fixes
+
+* Update README.md ([3d295ea](https://github.com/takost/go-example/commit/3d295eaffb3037c6827e5b0dc11315a0bf830f0a))
+
 ## [4.0.2](https://github.com/takost/go-example/compare/v4.0.1...v4.0.2) (2025-03-27)
 
 
