@@ -46,7 +46,8 @@ jobs:
                 Write-Host "JSON Object: $jsonObject"
 
                 # Convert JSON-like object to actual JSON (requires some cleanup)
-                $jsonObject = $jsonObject -replace "`n", "" -replace "  ", "" -replace "name:", '"name":' -replace "tag:", '"tag":' -replace "notes:", '"notes":' -replace "sha:", '"sha":' -replace "draft:", '"draft":' -replace "prerelease:", '"prerelease":' -replace "pullNumber:", '"pullNumber":'
+                $jsonObject = $jsonObject -replace "' \+     '", ""
+                $jsonObject = $jsonObject -replace "'n", "" -replace "  ", "" -replace "name:", '"name":' -replace "tag:", '"tag":' -replace "notes:", '"notes":' -replace "sha:", '"sha":' -replace "draft:", '"draft":' -replace "prerelease:", '"prerelease":' -replace "pullNumber:", '"pullNumber":'
                 # Convert to JSON object
                 try {
                   $releaseInfo = ConvertFrom-Json $jsonObject
