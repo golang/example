@@ -29,6 +29,10 @@ jobs:
           echo "PRS" ${{ steps.release.outputs.prs }}
       - run: |
           gh auth status
+      - run: |
+          release-please github-release --repo-url $GITHUB_REPOSITORY --token=$RELEASE_TOKEN --dry-run
+        env:
+          RELEASE_TOKEN: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
           
           
         
