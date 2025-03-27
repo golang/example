@@ -56,10 +56,10 @@ jobs:
                   Write-Host "Release Notes: $($releaseInfo.notes)"
 
                   # Set output variables for subsequent steps
-                  echo "::set-output name=release_name::$($releaseInfo.name)"
-                  echo "::set-output name=release_tag::$($releaseInfo.tag)"
-                  echo "::set-output name=release_notes::$($releaseInfo.notes)"
-                  echo "::set-output name=pullNumber::$($releaseInfo.pullNumber)"
+                  echo "release_name=$($releaseInfo.name)" >> $GITHUB_OUTPUT
+                  echo "release_tag=$($releaseInfo.tag)" >> $GITHUB_OUTPUT
+                  echo "release_notes=$($releaseInfo.notes)" >> $GITHUB_OUTPUT
+                  echo "pullNumber=$($releaseInfo.pullNumber)" >> $GITHUB_OUTPUT
                 } catch {
                   Write-Error "Failed to convert to JSON: $($_.Exception.Message)"
                   exit 1
@@ -80,7 +80,7 @@ jobs:
         if: steps.extract_release_information.outputs.release_name
         run: |
           echo "Creating release with tag ${{ steps.extract_release_information.outputs.release_tag }}, name ${{ steps.extract_release_information.outputs.release_name }}, notes ${{ steps.extract_release_information.outputs.release_notes }}"
-          gh release create ${{ steps.extract_release_information.outputs.release_tag }} --notes=${{ steps.extract_release_information.outputs.release_notes }} --title ${{ steps.extract_release_information.outputs.release_name }} --repo $GITHUB_REPOSITORY --prerelease
+          gh release create ${{ steps.extract_release_information.outputs.release_tag }} --notes="${{ steps.extract_release_information.outputs.release_notes }}" --title ${{ steps.extract_release_information.outputs.release_name }} --repo $GITHUB_REPOSITORY --prerelease
           gh pr edit ${{ steps.extract_release_information.outputs.pullName }} --repo $GITHUB_REPOSITORY --add-label "autorelease: tagged" --remove-label "autorelease: pending"
           
           
