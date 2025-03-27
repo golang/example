@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.0.0](https://github.com/takost/go-example/compare/v4.1.0...v5.0.0) (2025-03-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* ci
+
+### Bug Fixes
+
+* ci ([d8aa2e0](https://github.com/takost/go-example/commit/d8aa2e0a24767067b2312e86d36f6c57f68c2675))
+* ci ([28505d9](https://github.com/takost/go-example/commit/28505d99e4da8bef1840233685fec2a7f053d013))
+* ci ([9818671](https://github.com/takost/go-example/commit/9818671f7368759af46c84127ef579fdaffa035e))
+
 ## [4.1.0](https://github.com/takost/go-example/compare/v4.0.6...v4.1.0) (2025-03-27)
 
 
