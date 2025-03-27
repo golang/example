@@ -18,17 +18,14 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - uses: googleapis/release-please-action@v4
-        id: release
-        with:
-          token: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
+      # - uses: googleapis/release-please-action@v4
+      #   id: release
+      #   with:
+      #     token: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
       - run: |
           npm i release-please -g
       - run: |
-          echo "PR CREATED:" ${{ steps.release.outputs.prs_created }}
-          echo "PR:" ${{ steps.release.outputs.pr }}
-      - run: |
-          echo "PRS" ${{ steps.release.outputs.prs }}
+          release-please release-pr --repo-url $GITHUB_REPOSITORY --token=$RELEASE_TOKEN
       - run: |
           gh auth status
       - run: |
