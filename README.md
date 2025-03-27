@@ -20,7 +20,6 @@ It is mirrored at https://github.com/golang/example.
 $ cd hello
 $ go build
 $ ./hello -help
-
 ```
 A trivial "Hello, world" program that uses a library package.
 
