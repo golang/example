@@ -21,6 +21,7 @@ $ cd hello
 $ go build
 $ ./hello -help
 ```
+
 A trivial "Hello, world" program that uses a library package.
 
 The [hello](hello/) command covers:
