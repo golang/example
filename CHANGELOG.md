@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.0.5](https://github.com/takost/go-example/compare/v4.0.4...v4.0.5) (2025-03-27)
+
+
+### Bug Fixes
+
+* one more change ([9497eed](https://github.com/takost/go-example/commit/9497eedf2c9d9e933b62e9ef411b1eed736540d0))
+* Write only importamt ([a2ef307](https://github.com/takost/go-example/commit/a2ef307a4b45b72b6ffe35006cdf7675fa9f3055))
+
 ## [4.0.4](https://github.com/takost/go-example/compare/v4.0.3...v4.0.4) (2025-03-27)
 
 
