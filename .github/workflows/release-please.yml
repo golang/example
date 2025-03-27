@@ -32,46 +32,46 @@ jobs:
         id: extract_release_information
         run: |
           $output = release-please github-release --repo-url $GITHUB_REPOSITORY --token=$RELEASE_TOKEN --dry-run
-          # Extract the number of releases
-          $releasesMatch = [regex]::Match($output, 'Would tag (\d+) releases:')
-          if ($releasesMatch.Success) {
-            $numReleases = [int]$releasesMatch.Groups[1].Value
-            Write-Host "Number of releases to tag: $numReleases"
+          # # Extract the number of releases
+          # $releasesMatch = [regex]::Match($output, 'Would tag (\d+) releases:')
+          # if ($releasesMatch.Success) {
+          #   $numReleases = [int]$releasesMatch.Groups[1].Value
+          #   Write-Host "Number of releases to tag: $numReleases"
 
-            if ($numReleases -gt 0) {
-              # Extract the JSON-like object(s)
-              $jsonMatch = [regex]::Match($output, '(?s)\{(.*?)\}', [System.Text.RegularExpressions.RegexOptions]::Singleline)
-              if ($jsonMatch.Success) {
-                $jsonObject = $jsonMatch.Groups[0].Value
-                Write-Host "JSON Object: $jsonObject"
+          #   if ($numReleases -gt 0) {
+          #     # Extract the JSON-like object(s)
+          #     $jsonMatch = [regex]::Match($output, '(?s)\{(.*?)\}', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+          #     if ($jsonMatch.Success) {
+          #       $jsonObject = $jsonMatch.Groups[0].Value
+          #       Write-Host "JSON Object: $jsonObject"
 
-                # Convert JSON-like object to actual JSON (requires some cleanup)
-                $jsonObject = $jsonObject -replace "`n", "" -replace "  ", "" -replace "name:", '"name":' -replace "tag:", '"tag":' -replace "notes:", '"notes":' -replace "sha:", '"sha":' -replace "draft:", '"draft":' -replace "prerelease:", '"prerelease":' -replace "pullNumber:", '"pullNumber":'
-                # Convert to JSON object
-                try {
-                  $releaseInfo = ConvertFrom-Json $jsonObject
-                  Write-Host "Release Name: $($releaseInfo.name)"
-                  Write-Host "Release Tag: $($releaseInfo.tag)"
-                  Write-Host "Release Notes: $($releaseInfo.notes)"
+          #       # Convert JSON-like object to actual JSON (requires some cleanup)
+          #       $jsonObject = $jsonObject -replace "`n", "" -replace "  ", "" -replace "name:", '"name":' -replace "tag:", '"tag":' -replace "notes:", '"notes":' -replace "sha:", '"sha":' -replace "draft:", '"draft":' -replace "prerelease:", '"prerelease":' -replace "pullNumber:", '"pullNumber":'
+          #       # Convert to JSON object
+          #       try {
+          #         $releaseInfo = ConvertFrom-Json $jsonObject
+          #         Write-Host "Release Name: $($releaseInfo.name)"
+          #         Write-Host "Release Tag: $($releaseInfo.tag)"
+          #         Write-Host "Release Notes: $($releaseInfo.notes)"
 
-                  # Set output variables for subsequent steps
-                  echo "::set-output name=release_name::$($releaseInfo.name)"
-                  echo "::set-output name=release_tag::$($releaseInfo.tag)"
-                  echo "::set-output name=release_notes::$($releaseInfo.notes)"
-                  echo "::set-output name=pullNumber::$($releaseInfo.pullNumber)"
-                } catch {
-                  Write-Error "Failed to convert to JSON: $($_.Exception.Message)"
-                  exit 1
-                }
-              } else {
-                Write-Warning "No JSON object found in output."
-              }
-            } else {
-              Write-Host "No releases to create."
-            }
-          } else {
-            Write-Warning "Could not determine the number of releases."
-          }
+          #         # Set output variables for subsequent steps
+          #         echo "::set-output name=release_name::$($releaseInfo.name)"
+          #         echo "::set-output name=release_tag::$($releaseInfo.tag)"
+          #         echo "::set-output name=release_notes::$($releaseInfo.notes)"
+          #         echo "::set-output name=pullNumber::$($releaseInfo.pullNumber)"
+          #       } catch {
+          #         Write-Error "Failed to convert to JSON: $($_.Exception.Message)"
+          #         exit 1
+          #       }
+          #     } else {
+          #       Write-Warning "No JSON object found in output."
+          #     }
+          #   } else {
+          #     Write-Host "No releases to create."
+          #   }
+          # } else {
+          #   Write-Warning "Could not determine the number of releases."
+          # }
         env:
           RELEASE_TOKEN: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
