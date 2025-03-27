@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.0.2](https://github.com/takost/go-example/compare/v4.0.1...v4.0.2) (2025-03-27)
+
+
+### Bug Fixes
+
+* Fix ([4e12465](https://github.com/takost/go-example/commit/4e12465f38f0838e57d44d64429e47b4408aaf3f))
+* Update release-please.yml ([8970eda](https://github.com/takost/go-example/commit/8970eda5316499fcfb101a96e8fe47b8217e1e34))
+* Update workflow ([0364341](https://github.com/takost/go-example/commit/0364341c51763abde823ba112b82e27329b01018))
+
 ## [4.0.1](https://github.com/takost/go-example/compare/v4.0.0...v4.0.1) (2025-03-27)
 
 
