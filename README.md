@@ -18,7 +18,6 @@ It is mirrored at https://github.com/golang/example.
 
 ```
 $ cd hello
-
 $ go build
 $ ./hello -help
 ```
