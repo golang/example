@@ -5,7 +5,7 @@
       "release-type": "go",
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
-      "draft": false,
+      "draft": true,
       "prerelease": true
     }
   },
