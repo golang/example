@@ -13,9 +13,9 @@ This document is maintained by Jonathan Amsterdam `jba@google.com`.
 
 The standard library’s `log/slog` package has a two-part design.
 A "frontend," implemented by the `Logger` type,
-gathers stuctured log information like a message, level, and attributes,
+gathers structured log information like a message, level, and attributes,
 and passes them to a "backend," an implementation of the `Handler` interface.
-The package comes with two built-in handlers that usually should be adequate.
+The package comes with two built-in handlers that should usually be adequate.
 But you may need to write your own handler, and that is not always straightforward.
 This guide is here to help.
 
@@ -28,7 +28,7 @@ types work together.
 Each logger contains a handler. Certain `Logger` methods do some preliminary work,
 such as gathering key-value pairs into `Attr`s, and then call one or more
 `Handler` methods. These `Logger` methods are `With`, `WithGroup`,
-and the output methods.
+and the output methods like `Info`, `Error` and so on.
 
 An output method fulfills the main role of a logger: producing log output.
 Here is a call to an output method:
@@ -76,7 +76,7 @@ A logger's `WithGroup` method calls its handler's `WithGroup` method.
 
 We can now talk about the four `Handler` methods in detail.
 Along the way, we will write a handler that formats logs using a format
-reminsicent of YAML. It will display this log output call:
+reminiscent of YAML. It will display this log output call:
 
     logger.Info("hello", "key", 23)
 
@@ -94,13 +94,18 @@ so it will sometimes produce invalid YAML.
 For example, it doesn't quote keys that have colons in them.
 We'll call it `IndentHandler` to forestall disappointment.
 
+A brief aside before we start: it is tempting to embed `slog.Handler` in your
+custom handler and implement only the methods that you need.
+Loggers and handlers are too tightly coupled for that to work. You should
+implement all four handler methods.
+
 We begin with the `IndentHandler` type
 and the `New` function that constructs it from an `io.Writer` and options:
 
 %include indenthandler1/indent_handler.go types -
 
 We'll support only one option, the ability to set a minimum level in order to
-supress detailed log output.
+suppress detailed log output.
 Handlers should always declare this option to be a `slog.Leveler`.
 The `slog.Leveler` interface is implemented by both `Level` and `LevelVar`.
 A `Level` value is easy for the user to provide,
@@ -314,7 +319,7 @@ Most of the fields of `IndentHandler` can be copied shallowly, but the slice of
 the same underlying array. If we used `append` instead of making an explicit
 copy, we would introduce that subtle aliasing bug.
 
-Using `withGroupOrAttrs`, the `With` methods are easy:
+The `With` methods are easy to write using `withGroupOrAttrs`:
 
 %include indenthandler2/indent_handler.go withs -
 
@@ -362,7 +367,7 @@ See [this bug report](https://go.dev/issue/61321) for more detail.
 
 ### With pre-formatting
 
-Our second implementation implements pre-formatting.
+Our second version of the `WithGroup` and `WithAttrs` methods provides pre-formatting.
 This implementation is more complicated than the previous one.
 Is the extra complexity worth it?
 That depends on your circumstances, but here is one circumstance where
@@ -410,7 +415,7 @@ We also need to track how many groups we've opened, which we can do
 with a simple counter, since an opened group's only effect is to change the
 indentation level.
 
-The `WithGroup` implementation is a lot like the previous one: just remember the
+This `WithGroup` is a lot like the previous one: it just remembers the
 new group, which is unopened initially.
 
 %include indenthandler3/indent_handler.go WithGroup -
@@ -557,7 +562,7 @@ Beware of facile claims like "Unix writes are atomic"; the situation is a lot mo
 Some handlers have legitimate reasons for keeping state.
 For example, a handler might support a `SetLevel` method to change its configured level
 dynamically.
-Or it might output the time between sucessive calls to `Handle`,
+Or it might output the time between successive calls to `Handle`,
 which requires a mutable field holding the last output time.
 Synchronize all accesses to such fields, both reads and writes.
 
@@ -571,7 +576,7 @@ impossible to inspect a system, as is typically the case with a production
 server, logs provide the most detailed way to understand its behavior.
 Therefore, your handler should be robust to bad input.
 
-For example, the usual advice when when a function discovers a problem,
+For example, the usual advice when a function discovers a problem,
 like an invalid argument, is to panic or return an error.
 The built-in handlers do not follow that advice.
 Few things are more frustrating than being unable to debug a problem that

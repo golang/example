@@ -22,8 +22,11 @@ This document is maintained by Alan Donovan `adonovan@google.com`.
 	1. [Struct Types](#struct-types)
 	1. [Tuple Types](#tuple-types)
 	1. [Function and Method Types](#function-and-method-types)
+	1. [Alias Types](#alias-types)
 	1. [Named Types](#named-types)
 	1. [Interface Types](#interface-types)
+	1. [TypeParam types](#typeparam-types)
+	1. [Union types](#union-types)
 	1. [TypeAndValue](#typeandvalue)
 1. [Selections](#selections)
 1. [Ids](#ids)
@@ -103,9 +106,6 @@ type, or has an inappropriate type for its context; this is known as
 _type deduction_.
 Third, for every constant expression in the program, it determines the
 value of that constant; this is known as _constant evaluation_.
-
-
-
 Superficially, it appears that these three processes could be done
 sequentially, in the order above, but perhaps surprisingly, they must
 be done together.
@@ -115,9 +115,6 @@ Conversely, the type of an expression may depend on the value of a
 constant, since array types contain constants.
 As a result, type deduction and constant evaluation must be done
 together.
-
-
-
 As another example, we cannot resolve the identifier `k` in the composite
 literal `T{k: 0}` until we know whether `T` is a struct type.
 If it is, then `k` must be found among `T`'s fields.
@@ -264,7 +261,7 @@ Scope:   package "cmd/hello" scope 0x820533590 {
 
 A package's `Path`, such as `"encoding/json"`, is the string
 by which import declarations identify it.
-It is unique within a `$GOPATH` workspace,
+It is unique within a workspace,
 and for published packages it must be globally unique.
 
 
@@ -282,7 +279,7 @@ which provides access to all the named entities or
 [_objects_](#objects) declared at package level.
 `Imports` returns the set of packages directly imported by this
 one, and  may be useful for computing dependencies
-([Initialization Order](#initialization-order)).
+(see [Initialization Order](#initialization-order)).
 
 
 
@@ -336,12 +333,8 @@ offset, though usually we just call its `String` method:
 	fmt.Println(fset.Position(obj.Pos())) // "hello.go:10:6"
 
 
-Not all objects carry position information.
-Since the file format for compiler export data ([Imports](#imports))
-does not record position information, calling `Pos` on an object
-imported from such a file returns zero, also known as
-`token.NoPos`.
-
+Objects for predeclared functions and types such as `len` and `int`
+do not have a valid (non-zero) position: `!obj.Pos().IsValid()`.
 
 
 There are eight kinds of objects in the Go type checker.
@@ -367,14 +360,22 @@ possible types, and we commonly use a type switch to distinguish them.
 	       | *Nil          // predeclared nil
 
 
-`Object`s are canonical.
-That is, two `Object`s `x` and `y` denote the same
-entity if and only if `x==y`.
+
+Objects are canonical.
+That is, two Objects `x` and `y` denote the same entity if and only if `x==y`.
+(This is generally true but beware that parameterized types complicate matters; see
+https://github.com/golang/exp/tree/master/typeparams/example for details.)
+
 Object identity is significant, and objects are routinely compared by
 the addresses of the underlying pointers.
-Although a package-level object is uniquely identified by its name
-and enclosing package, for other objects there is no simple way to
-obtain a string that uniquely identifies it.
+A package-level object (func/var/const/type) can be uniquely
+identified by its name and enclosing package.
+The [`golang.org/x/tools/go/types/objectpath`](https://pkg.go.dev/golang.org/x/tools/go/types/objectpath)
+package defines a naming scheme for objects that are
+[exported](#imports) from their package or are unexported but form part of the
+type of an exported object.
+But for most objects, including all function-local objects,
+there is no simple way to obtain a string that uniquely identifies it.
 
 
 
@@ -409,7 +410,7 @@ And some kinds of objects have methods in addition to those required by the
 
 
 `(*Func).Scope` returns the [lexical block](#scopes)
-containing the function's parameters, results,
+containing the function's type parameters, parameters, results,
 and other local declarations.
 `(*Var).IsField` distinguishes struct fields from ordinary
 variables, and `(*Var).Anonymous` discriminates named fields like
@@ -417,10 +418,12 @@ the one in `struct{T T}` from anonymous fields like the one in `struct{T}`.
 `(*Const).Val` returns the value of a named [constant](#constants).
 
 
-`(*TypeName).IsAlias`, introduced in Go 1.9, reports whether the
-type name is simply an alias for a type (as in `type I = int`),
-as opposed to a definition of a [`Named`](#named-types) type, as
-in `type Celsius float64`.
+`(*TypeName).IsAlias` reports whether the type name declares an alias
+for an existing type (as in `type I = int`), as opposed to defining a new
+[`Named`](#named-types) type, as in `type Celsius float64`.
+(Most `TypeName`s for which `IsAlias()` is true have a `Type()` of
+type `*types.Alias`, but `IsAlias()` is also true for the predeclared
+`byte` and `rune` types, which are aliases for `uint8` and `int32`.)
 
 
 `(*PkgName).Imported` returns the package (for instance,
@@ -436,9 +439,9 @@ We'll look more closely at this in [Imports](#imports).
 All relationships between the syntax trees (`ast.Node`s) and type
 checker data structures such as `Object`s and `Type`s are
 stored in mappings outside the syntax tree itself.
-Be aware that the `go/ast` package also defines a type called
-`Object` that resembles---and predates---the type checker's
-`Object`, and that `ast.Object`s are held directly by
+Be aware that the `go/ast` package also defines an older deprecated
+type called `Object` that resembles---and predates---the type
+checker's `Object`, and that `ast.Object`s are held directly by
 identifiers in the AST.
 They are created by the parser, which has a necessarily limited view
 of the package, so the information they represent is at best partial and
@@ -974,7 +977,7 @@ Here is the interface:
 	}
 
 
-And here are the eleven concrete types that satisfy it:
+And here are the 14 concrete types that satisfy it:
 
 
 	Type = *Basic
@@ -986,12 +989,17 @@ And here are the eleven concrete types that satisfy it:
 	     | *Struct
 	     | *Tuple
 	     | *Signature
+	     | *Alias
 	     | *Named
 	     | *Interface
+	     | *Union
+	     | *TypeParam
 
 
 With the exception of `Named` types, instances of `Type` are
 not canonical.
+(Even for `Named` types, parameterized types complicate matters; see
+https://github.com/golang/exp/tree/master/typeparams/example.)
 That is, it is usually a mistake to compare types using `t1==t2`
 since this equivalence is not the same as the
 [type identity relation](https://golang.org/ref/spec#Type_identity)
@@ -1052,8 +1060,8 @@ basic type this is.
 The kinds `Bool`, `String`, `Int16`, and so on,
 represent the corresponding predeclared boolean, string, or numeric
 types.
-There are two synonyms: `Byte` is equivalent to `Uint8`
-and `Rune` is equivalent to `Int32`.
+There are two aliases: `Byte` is an alias for `Uint8`
+and `Rune` is an alias for `Int32`.
 The kind `UnsafePointer` represents `unsafe.Pointer`.
 The kinds `UntypedBool`, `UntypedInt` and so on represent
 the six kinds of "untyped" constant types: boolean, integer, rune,
@@ -1082,21 +1090,20 @@ modify it.
 
 
 A few minor subtleties:
-According to the Go spec, pre-declared types such as `int` are
-named types for the purposes of assignability, even though the type
-checker does not represent them using `Named`.
-And `unsafe.Pointer` is a pointer type for the purpose of
-determining whether the receiver type of a method is legal, even
-though the type checker does not represent it using `Pointer`.
 
+- According to the Go spec, pre-declared types such as `int` are
+  named types for the purposes of assignability, even though the type
+  checker does not represent them using `Named`.
 
+- `unsafe.Pointer` is a pointer type for the purpose of
+  determining whether the receiver type of a method is legal, even
+  though the type checker does not represent it using `Pointer`.
 
-The "untyped" types are usually only ascribed to constant expressions,
-but there is one exception.
-A comparison `x==y` has type "untyped bool", so the result of
-this expression may be assigned to a variable of type `bool` or
-any other named boolean type.
-
+- The "untyped" types are usually only ascribed to constant expressions,
+  but there is one exception.
+  A comparison `x==y` has type "untyped bool", so the result of
+  this expression may be assigned to a variable of type `bool` or
+  any other named boolean type.
 
 
 ## Simple Composite Types
@@ -1262,21 +1269,73 @@ These types are recorded during type checking for later use
 
 
 
-## Named Types
+## Alias Types
 
+Type declarations come in two forms, aliases and defined types.
 
-Type declarations come in two forms.
-The simplest kind, introduced in Go 1.9,
-merely declares a (possibly alternative) name for an existing type.
-Type names used in this way are informally called _type aliases_.
-For example, this declaration lets you use the type
-`Dictionary` as an alias for `map[string]string`:
+Aliases, though introduced only in Go 1.9 and not very common, are
+simplest, so we'll present them first and explain defined types in
+the next section ("Named Types").
+
+An alias type declaration declares an alternative name for an existing
+type. For example, this declaration lets you use the type `Dictionary`
+as a synonym for `map[string]string`:
 
 	type Dictionary = map[string]string
 
-The declaration creates a `TypeName` object for `Dictionary`.  The
-object's `IsAlias` method returns true, and its `Type` method returns
-a `Map` type that represents `map[string]string`.
+The declaration creates a `TypeName` object for `Dictionary`.
+The object's `IsAlias` method returns true,
+and its `Type` method returns an `Alias`:
+
+        type Alias struct{ ... }
+	func (a *Alias) Obj() *TypeName
+	func (a *Alias) Origin() *Alias
+	func (a *Alias) Rhs() Type
+	func (a *Alias) SetTypeParams(tparams []*TypeParam)
+	func (a *Alias) TypeArgs() *TypeList
+	func (a *Alias) TypeParams() *TypeParamList
+
+The type on the right-hand side of an alias declaration,
+such as `map[string]string` in the example above,
+can be accessed using the `Rhs()` method.
+The `types.Unalias(t)` helper function recursively applies `Rhs`,
+removing all `Alias` types from the operand t and returning the
+outermost non-alias type.
+
+The `Obj` method returns the declaring `TypeName` object, such as
+`Dictionary`; it provides the name, position, and other properties of
+the declaration. Conversely, the `TypeName` object's `Type` method
+returns the `Alias` type.
+
+Starting with Go 1.24, alias types may have type parameters.
+For example, this declaration creates an Alias type with
+a type parameter:
+
+	type Set[T comparable] = map[T]bool
+
+Each instantiation such as `Set[string]` is identical to the
+corresponding instantiation of the alias' right-hand side type, such
+as `map[string]bool`.
+
+The remaining methods--Origin, SetTypeParams, TypeArgs,
+TypeParams--are all concerned with type parameters. For now, see
+https://github.com/golang/exp/tree/master/typeparams/example.
+
+Prior to Go 1.22, aliases were not materialized as `Alias` types:
+each reference to an alias type such as `Dictionary` would be
+immediately replaced by its right-hand side type, leaving no
+indication in the output of the type checker that an alias was
+present.
+By materializing alias types, optionally in Go 1.22 and by default
+starting in Go 1.23, we can more faithfully record the structure of
+the program, which improves the quality of diagnostic messages and
+enables certain analyses and code transformations. And, crucially, it
+enabled the addition of parameterized aliases in Go 1.24.)
+
+
+
+## Named Types
+
 
 
 The second form of type declaration, and the only kind prior to Go
@@ -1292,10 +1351,11 @@ from any other type, including `float64`.  The declaration binds the
 
 Since Go 1.9, the Go language specification has used the term _defined
 types_ instead of named types;
-the essential property of a defined type is not that it has a name,
+the essential property of a defined type is not that it has a name
+(aliases and type parameters also have names)
 but that it is a distinct type with its own method set.
 However, the type checker API predates that
-change and instead calls defined types "named" types.
+change and instead calls defined types `Named` types.
 
 	type Named struct{ ... }
 	func (*Named) NumMethods() int
@@ -1321,8 +1381,8 @@ methods than this list.  We'll return to this in [Method Sets](#method-sets).
 
 
 Every `Type` has an `Underlying` method, but for all of them
-except `*Named`, it is simply the identity function.
-For a named type, `Underlying` returns its underlying type, which
+except `*Named` and `*Alias`, it is simply the identity function.
+For a named or alias type, `Underlying` returns its underlying type, which
 is always an unnamed type.
 Thus `Underlying` returns `int` for both `T` and
 `U` below.
@@ -1335,14 +1395,13 @@ Thus `Underlying` returns `int` for both `T` and
 Clients of the type checker often use type assertions or type switches
 with a `Type` operand.
 When doing so, it is often necessary to switch on the type that
-_underlies_ the type of interest, and failure to do so may be a
-bug.
+underlies the type of interest, and failure to do so may be a bug.
 
 This is a common pattern:
 
 
 	// handle types of composite literal
-	switch u := t.Underlying().(type) {
+	switch u := t.Underlying().(type) {  // remove any *Named and *Alias types
 	case *Struct:        // ...
 	case *Map:           // ...
 	case *Array, *Slice: // ...
@@ -1420,6 +1479,36 @@ interface `v`, then the type assertion is not legal, as in this example:
 
 	// error: io.Writer is not assertible to int
 	func f(w io.Writer) int { return w.(int) }
+
+
+
+
+## TypeParam types
+
+
+A `TypeParam` is the type of a type parameter.
+For example, the type of the variable `x` in the `identity` function
+below is a `TypeParam`:
+
+    func identity[T any](x T) T { return x }
+
+As with `Alias` and `Named` types, each `TypeParam` has an associated
+`TypeName` object that provides its name, position, and other
+properties of the declaration.
+
+See https://github.com/golang/exp/tree/master/typeparams/example
+for a more thorough treatment of parameterized types.
+
+
+
+
+## Union types
+
+A `Union` is the type of type-parameter constraint of the form `func
+f[T int | string]`.
+
+See https://github.com/golang/exp/tree/master/typeparams/example
+for a more thorough treatment of parameterized types.
 
 
 
@@ -2264,10 +2353,9 @@ compiler file formats, and so on.
 	}
 
 
-Most of our examples used the simplest `Importer` implementation,
+Most of our examples used the trivial `Importer` implementation,
 `importer.Default()`, provided by the `go/importer` package.
-This importer looks in `$GOROOT` and `$GOPATH` for `.a`
-files written by the compiler (`gc` or `gccgo`)
+This importer looks for `.a` files written by the compiler
 that was used to build the program.
 In addition to object code, these files contain _export data_,
 that is, a description of all the objects declared by the package, and
@@ -2279,13 +2367,11 @@ transitive dependency.
 
 
 Compiler export data is compact and efficient to locate, load, and
-parse, but it has several shortcomings.
-First, it does not contain position information for imported
-objects, reducing the quality of certain diagnostic messages.
-Second, it does not contain complete syntax trees nor semantic information
-about the contents of function bodies, so it is not suitable for
-interprocedural analyses.
-Third, compiler object data may be stale.  Nothing detects or ensures
+parse, but it has some shortcomings.
+First, it does not contain complete syntax trees nor semantic
+information about the bodies of all functions, so it is not
+suitable for interprocedural analyses.
+Second, compiler object data may be stale.  Nothing detects or ensures
 that the object files are more recent than the source files from which
 they were derived.
 Generally, object data for standard packages is likely to be
