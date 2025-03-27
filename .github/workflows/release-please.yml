@@ -13,6 +13,7 @@ name: release-please
 
 env:
   GH_TOKEN: ${{ github.token }} 
+  RELEASE_TOKEN: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
 
 jobs:
   release-please:
