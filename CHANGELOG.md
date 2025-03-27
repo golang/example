@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/takost/go-example/compare/v2.1.0...v2.1.1) (2025-03-27)
+
+
+### Bug Fixes
+
+* draft ([5a2dbe8](https://github.com/takost/go-example/commit/5a2dbe858b1ed1ab452e9430f12cdec47216f05b))
+
 ## [2.1.0](https://github.com/takost/go-example/compare/v2.0.0...v2.1.0) (2025-03-27)
 
 
