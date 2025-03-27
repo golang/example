@@ -56,10 +56,10 @@ jobs:
                   Write-Host "Release Notes: $($releaseInfo.notes)"
 
                   # Set output variables for subsequent steps
-                  echo "release_name=$($releaseInfo.name)" >> $GITHUB_OUTPUT
-                  echo "release_tag=$($releaseInfo.tag)" >> $GITHUB_OUTPUT
-                  echo "release_notes=$($releaseInfo.notes)" >> $GITHUB_OUTPUT
-                  echo "pullNumber=$($releaseInfo.pullNumber)" >> $GITHUB_OUTPUT
+                  echo "release_name=$($releaseInfo.name)" >> $env:GITHUB_OUTPUT
+                  echo "release_tag=$($releaseInfo.tag)" >> $env:$GITHUB_OUTPUT
+                  echo "release_notes=$($releaseInfo.notes)" >> $env:$GITHUB_OUTPUT
+                  echo "pullNumber=$($releaseInfo.pullNumber)" >> $env:$GITHUB_OUTPUT
                 } catch {
                   Write-Error "Failed to convert to JSON: $($_.Exception.Message)"
                   exit 1
