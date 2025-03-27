@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/takost/go-example/compare/v2.0.0...v2.1.0) (2025-03-27)
+
+
+### Features
+
+* fixx ([a4ea541](https://github.com/takost/go-example/commit/a4ea541c7917ad88774b6fda022a998787c21e5a))
+
 ## [2.0.0](https://github.com/takost/go-example/compare/v1.0.1...v2.0.0) (2025-03-27)
 
 
