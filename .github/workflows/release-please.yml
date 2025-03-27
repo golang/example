@@ -11,6 +11,9 @@ permissions:
   pull-requests: write
 name: release-please
 
+env:
+  GH_TOKEN: ${{ github.token }} 
+
 jobs:
   release-please:
     runs-on: ubuntu-latest
@@ -30,7 +33,6 @@ jobs:
           echo ${{ steps.release.outputs.prs_created }}
           echo ${{ steps.release.outputs.release_created }}
       - run: |
-          gh auth login --with-token ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
           gh auth status
           
           
