@@ -23,6 +23,8 @@ jobs:
         with:
           token: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
       - run: |
+          npm i release-please -g
+      - run: |
           echo "PR CREATED:" ${{ steps.release.outputs.prs_created }}
           echo "PR:" ${{ steps.release.outputs.pr }}
       - run: |
