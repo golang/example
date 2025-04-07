@@ -853,7 +853,7 @@ impossible to inspect a system, as is typically the case with a production
 server, logs provide the most detailed way to understand its behavior.
 Therefore, your handler should be robust to bad input.
 
-For example, the usual advice when when a function discovers a problem,
+For example, the usual advice when a function discovers a problem,
 like an invalid argument, is to panic or return an error.
 The built-in handlers do not follow that advice.
 Few things are more frustrating than being unable to debug a problem that
