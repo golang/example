@@ -28,6 +28,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -72,11 +73,12 @@ func main() {
 			depth := len(words[0])
 			words = words[1:]
 			text := strings.Join(words, " ")
-			for i := range words {
-				words[i] = strings.ToLower(words[i])
-			}
-			line = fmt.Sprintf("%s1. [%s](#%s)",
-				strings.Repeat("\t", depth-1), text, strings.Join(words, "-"))
+			anchor := strings.Join(words, "-")
+			anchor = strings.ToLower(anchor)
+			anchor = strings.ReplaceAll(anchor, "**", "")
+			anchor = strings.ReplaceAll(anchor, "`", "")
+			anchor = strings.ReplaceAll(anchor, "_", "")
+			line = fmt.Sprintf("%s1. [%s](#%s)", strings.Repeat("\t", depth-1), text, anchor)
 			toc = append(toc, line)
 		}
 	}
@@ -85,7 +87,7 @@ func main() {
 	}
 
 	// Pass 2.
-	if _, err := f.Seek(0, os.SEEK_SET); err != nil {
+	if _, err := f.Seek(0, io.SeekStart); err != nil {
 		log.Fatalf("can't rewind input: %v", err)
 	}
 	in = bufio.NewScanner(f)
@@ -171,12 +173,6 @@ func include(file, tag string) (string, error) {
 		return "", fmt.Errorf("no lines of %s matched tag %q", file, tag)
 	}
 	return text.String(), nil
-}
-
-func isBlank(line string) bool { return strings.TrimSpace(line) == "" }
-
-func indented(line string) bool {
-	return strings.HasPrefix(line, "    ") || strings.HasPrefix(line, "\t")
 }
 
 // cleanListing removes entirely blank leading and trailing lines from
