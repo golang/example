@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The Multi-stage CI/CD Pipeline</title>
+</head>
+<body>
+<h1>Multi-stage CI/CD Pipeline</h1>
+
+<p>
+    The main purpose of a CI/CD pipeline is to automate the process of building, testing, and preparing code for deployment whenever new changes are introduced.
+    This helps identify errors early, ensures code quality, and makes development more efficient and reliable.
+</p>
+
+<p>In this project, the pipeline follows these stages:</p>
+
+<ul>
+    <li><strong>Checkout:</strong> Retrieves the latest code from the repository to ensure the workflow uses the most up-to-date version.</li>
+    <li><strong>Setup:</strong> Configures the correct Go environment so that the application can be built and tested properly.</li>
+    <li><strong>Build:</strong> Uses <code>go build</code> inside the <code>outyet/</code> directory to compile the code and verify that it can run without syntax errors.</li>
+    <li><strong>Test:</strong> Runs <code>go test</code> to check that all functions behave as expected and that the logic remains correct after any changes.</li>
+    <li><strong>Upload:</strong> If the build is successful, the resulting binary is uploaded as an artifact for future use (e.g., deployment or review).</li>
+</ul>
+
+<p>
+    This type of automation reduces manual effort, minimizes the risk of human error, and speeds up the development workflow by giving quick feedback on every change.
+</p>
+</body>
+</html>
