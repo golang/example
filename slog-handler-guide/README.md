@@ -115,7 +115,7 @@ implement all four handler methods.
 We begin with the `IndentHandler` type
 and the `New` function that constructs it from an `io.Writer` and options:
 
-```
+```go
 type IndentHandler struct {
 	opts Options
 	// TODO: state for WithGroup and WithAttrs
@@ -186,7 +186,7 @@ of the work done by each request to be controlled independently.
 Our `IndentHandler` doesn't use the context. It just compares the argument level
 with its configured minimum level:
 
-```
+```go
 func (h *IndentHandler) Enabled(ctx context.Context, level slog.Level) bool {
 	return level >= h.opts.Level.Level()
 }
@@ -232,7 +232,7 @@ groups established by `WithGroup`.
 
 That is how `IndentHandler.Handle` is structured:
 
-```
+```go
 func (h *IndentHandler) Handle(ctx context.Context, r slog.Record) error {
 	buf := make([]byte, 0, 1024)
 	if !r.Time.IsZero() {
@@ -287,7 +287,7 @@ goroutines that may be calling `Handle` at the same time.
 At the heart of the handler is the `appendAttr` method, responsible for
 formatting a single attribute:
 
-```
+```go
 func (h *IndentHandler) appendAttr(buf []byte, a slog.Attr, indentLevel int) []byte {
 	// Resolve the Attr's value before doing anything else.
 	a.Value = a.Value.Resolve()
@@ -405,7 +405,7 @@ Our first implementation will collect the information from `WithGroup` and
 and loop over that slice in `Handle`. We start with a struct that can hold
 either a group name or some attributes:
 
-```
+```go
 // groupOrAttrs holds either a group name or a list of slog.Attrs.
 type groupOrAttrs struct {
 	group string      // group name if non-empty
@@ -415,7 +415,7 @@ type groupOrAttrs struct {
 
 Then we add a slice of `groupOrAttrs` to our handler:
 
-```
+```go
 type IndentHandler struct {
 	opts Options
 	goas []groupOrAttrs
@@ -429,7 +429,7 @@ receiver.
 To that end, we define a method that will copy our handler struct
 and append one `groupOrAttrs` to the copy:
 
-```
+```go
 func (h *IndentHandler) withGroupOrAttrs(goa groupOrAttrs) *IndentHandler {
 	h2 := *h
 	h2.goas = make([]groupOrAttrs, len(h.goas)+1)
@@ -446,7 +446,7 @@ copy, we would introduce that subtle aliasing bug.
 
 The `With` methods are easy to write using `withGroupOrAttrs`:
 
-```
+```go
 func (h *IndentHandler) WithGroup(name string) slog.Handler {
 	if name == "" {
 		return h
@@ -465,7 +465,7 @@ func (h *IndentHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 The `Handle` method can now process the groupOrAttrs slice after
 the built-in attributes and before the ones in the record:
 
-```
+```go
 func (h *IndentHandler) Handle(ctx context.Context, r slog.Record) error {
 	buf := make([]byte, 0, 1024)
 	if !r.Time.IsZero() {
@@ -587,7 +587,7 @@ by formatting the attributes in a call to `With` just once.
 To pre-format the arguments to `WithAttrs`, we need to keep track of some
 additional state in the `IndentHandler` struct.
 
-```
+```go
 type IndentHandler struct {
 	opts           Options
 	preformatted   []byte   // data from WithGroup and WithAttrs
@@ -608,7 +608,7 @@ indentation level.
 This `WithGroup` is a lot like the previous one: it just remembers the
 new group, which is unopened initially.
 
-```
+```go
 func (h *IndentHandler) WithGroup(name string) slog.Handler {
 	if name == "" {
 		return h
@@ -624,7 +624,7 @@ func (h *IndentHandler) WithGroup(name string) slog.Handler {
 
 `WithAttrs` does all the pre-formatting:
 
-```
+```go
 func (h *IndentHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	if len(attrs) == 0 {
 		return h
@@ -668,7 +668,7 @@ method we saw above.
 It's the `Handle` method's job to insert the pre-formatted material in the right
 place, which is after the built-in attributes and before the ones in the record:
 
-```
+```go
 func (h *IndentHandler) Handle(ctx context.Context, r slog.Record) error {
 	buf := make([]byte, 0, 1024)
 	if !r.Time.IsZero() {
@@ -728,7 +728,7 @@ That package's `TestHandler` function takes an instance of your handler and
 a function that returns its output formatted as a slice of maps. Here is the test function
 for our example handler:
 
-```
+```go
 func TestSlogtest(t *testing.T) {
 	var buf bytes.Buffer
 	err := slogtest.TestHandler(New(&buf, nil), func() []map[string]any {
@@ -754,7 +754,7 @@ of the box.
 Our example output is enough like YAML so that we can use the `gopkg.in/yaml.v3`
 package to parse it:
 
-```
+```go
 func parseLogEntries(t *testing.T, data []byte) []map[string]any {
 	entries := bytes.Split(data, []byte("---\n"))
 	entries = entries[:len(entries)-1] // last one is empty
@@ -985,7 +985,7 @@ re-assign it before freeing:
 
 Here is our pool and its associated functions:
 
-```
+```go
 var bufPool = sync.Pool{
 	New: func() any {
 		b := make([]byte, 0, 1024)

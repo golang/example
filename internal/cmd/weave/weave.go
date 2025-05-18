@@ -27,6 +27,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -37,13 +38,14 @@ import (
 )
 
 func main() {
+	flag.Parse()
 	log.SetFlags(0)
 	log.SetPrefix("weave: ")
-	if len(os.Args) != 2 {
+	if flag.NArg() != 1 {
 		log.Fatal("usage: weave input.md\n")
 	}
 
-	f, err := os.Open(os.Args[1])
+	f, err := os.Open(flag.Arg(0))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,26 +102,38 @@ func main() {
 			}
 		case strings.HasPrefix(line, "%include"):
 			words := strings.Fields(line)
-			if len(words) < 2 {
-				log.Fatal(line)
+			var section string
+			caption := true
+			switch len(words) {
+			case 2: // %include filename
+			// Nothing to do.
+			case 3: // %include filename section OR %include filename -
+				if words[2] == "-" {
+					caption = false
+				} else {
+					section = words[2]
+				}
+			case 4: // %include filename section -
+				section = words[2]
+				if words[3] != "-" {
+					log.Fatalf("last word is not '-': %s", line)
+				}
+				caption = false
+			default:
+				log.Fatalf("wrong # words (want 2-4): %s", line)
 			}
 			filename := words[1]
 
-			// Show caption unless '-' follows.
-			if len(words) < 4 || words[3] != "-" {
+			if caption {
 				fmt.Printf("	// go get golang.org/x/example/%s/%s\n\n",
 					curDir, filepath.Dir(filename))
 			}
 
-			section := ""
-			if len(words) > 2 {
-				section = words[2]
-			}
 			s, err := include(filename, section)
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println("```")
+			fmt.Println("```go")
 			fmt.Println(cleanListing(s)) // TODO(adonovan): escape /^```/ in s
 			fmt.Println("```")
 		default:

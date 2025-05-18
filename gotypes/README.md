@@ -143,7 +143,7 @@ run `go get golang.org/x/example/gotypes/...`.
 
 	// go get golang.org/x/example/gotypes/pkginfo
 
-```
+```go
 package main
 
 import (
@@ -247,7 +247,7 @@ Finally, the program prints the attributes of the package, shown below.
 (The hexadecimal number may vary from one run to the next.)
 
 
-```
+```go
 $ go build golang.org/x/example/gotypes/pkginfo
 $ ./pkginfo
 Package  "cmd/hello"
@@ -505,7 +505,7 @@ identifier in the input program, and the object it refers to.
 
 	// go get golang.org/x/example/gotypes/defsuses
 
-```
+```go
 func PrintDefsUses(fset *token.FileSet, files ...*ast.File) error {
 	conf := types.Config{Importer: importer.Default()}
 	info := &types.Info{
@@ -535,7 +535,7 @@ Let's use the _hello, world_ program again as the input:
 
 	// go get golang.org/x/example/gotypes/hello
 
-```
+```go
 package main
 
 import "fmt"
@@ -549,7 +549,7 @@ func main() {
 This is what it prints:
 
 
-```
+```go
 $ go build golang.org/x/example/gotypes/defsuses
 $ ./defsuses
 hello.go:1:9: "main" defines <nil>
@@ -796,7 +796,7 @@ preserve comments in the input.
 
 	// go get golang.org/x/example/gotypes/lookup
 
-```
+```go
 func main() {
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, "hello.go", hello, parser.ParseComments)
@@ -839,7 +839,7 @@ The second comment looks up `"fmt"` in the `main` function's block,
 and so on.
 
 
-```
+```go
 const hello = `
 package main
 
@@ -863,7 +863,7 @@ func main() {
 Here's the output:
 
 
-```
+```go
 $ go build golang.org/x/example/gotypes/lookup
 $ ./lookup
 At hello.go:6:1,        "append" = builtin append
@@ -1566,7 +1566,7 @@ type-checked file and prints its type, value, and mode:
 
 	// go get golang.org/x/example/gotypes/typeandvalue
 
-```
+```go
 // f is a parsed, type-checked *ast.File.
 ast.Inspect(f, func(n ast.Node) bool {
 	if expr, ok := n.(ast.Expr); ok {
@@ -1596,7 +1596,7 @@ It makes use of these two helper functions, which are not shown:
 Given this input:
 
 
-```
+```go
 const input = `
 package main
 
@@ -1613,7 +1613,7 @@ func main() {
 the program prints:
 
 
-```
+```go
 $ go build golang.org/x/example/gotypes/typeandvalue
 $ ./typeandvalue
 make(map[string]int)            mode:  value
@@ -1672,7 +1672,7 @@ comparing a method `x.f` against nil is a common mistake.
 
 	// go get golang.org/x/example/gotypes/nilfunc
 
-```
+```go
 // CheckNilFuncComparison reports unintended comparisons
 // of functions against nil, e.g., "if x.Method == nil {".
 func CheckNilFuncComparison(info *types.Info, n ast.Node) {
@@ -1718,7 +1718,7 @@ func CheckNilFuncComparison(info *types.Info, n ast.Node) {
 Given this input,
 
 
-```
+```go
 const input = `package main
 
 import "bytes"
@@ -1736,7 +1736,7 @@ func main() {
 the program reports these errors:
 
 
-```
+```go
 $ go build golang.org/x/example/gotypes/nilfunc
 $ ./nilfunc
 input.go:7:5: comparison of function Bytes == nil is always false
@@ -1969,7 +1969,7 @@ interface.
 Here's an example:
 
 
-```
+```go
 $ ./skeleton io ReadWriteCloser buffer
 // *buffer implements io.ReadWriteCloser.
 type buffer struct{}
@@ -1993,7 +1993,7 @@ calls `PrintSkeleton` with the remaining two arguments:
 
 	// go get golang.org/x/example/gotypes/skeleton
 
-```
+```go
 func PrintSkeleton(pkg *types.Package, ifacename, concname string) error {
 	obj := pkg.Scope().Lookup(ifacename)
 	if obj == nil {
@@ -2051,7 +2051,7 @@ Passing `(*types.Package).Name` causes only the package name
 Here's another example that illustrates it:
 
 
-```
+```go
 $ ./skeleton net/http Handler myHandler
 // *myHandler implements net/http.Handler.
 type myHandler struct{}
@@ -2067,7 +2067,7 @@ in `pkg`, and reports the types that satisfy each interface type.
 
 	// go get golang.org/x/example/gotypes/implements
 
-```
+```go
 // Find all named types at package level.
 var allNamed []*types.Named
 for _, name := range pkg.Scope().Names() {
@@ -2099,7 +2099,7 @@ Given this input,
 
 	// go get golang.org/x/example/gotypes/implements
 
-```
+```go
 const input = `package main
 
 type A struct{}
@@ -2118,7 +2118,7 @@ type J interface { g() }
 the program prints:
 
 
-```
+```go
 $ go build golang.org/x/example/gotypes/implements
 $ ./implements
 *hello.A satisfies hello.I
@@ -2276,7 +2276,7 @@ programs.
 
 	// go get golang.org/x/example/gotypes/hugeparam
 
-```
+```go
 var bytesFlag = flag.Int("bytes", 48, "maximum parameter size in bytes")
 
 func PrintHugeParams(fset *token.FileSet, info *types.Info, sizes types.Sizes, files []*ast.File) {
@@ -2324,7 +2324,7 @@ It reports a number of places where the 7-word
 is copied.
 
 
-```
+```go
 % ./hugeparam encoding/xml
 /go/src/encoding/xml/marshal.go:167:50: "start" parameter: encoding/xml.StartElement = 56 bytes
 /go/src/encoding/xml/marshal.go:734:97: "" result: encoding/xml.StartElement = 56 bytes
@@ -2408,7 +2408,7 @@ the command line.
 Here's an example:
 
 
-```
+```go
 $ ./doc net/http File
 type net/http.File interface{Readdir(count int) ([]os.FileInfo, error); Seek(offset int64, whence int) (int64, error); Stat() (os.FileInfo, error); io.Closer; io.Reader}
 $GOROOT/src/io/io.go:92:2: method (net/http.File) Close() error
@@ -2435,7 +2435,7 @@ plus exported type information for its dependencies.
 
 	// go get golang.org/x/example/gotypes/doc
 
-```
+```go
 pkgpath, name := os.Args[1], os.Args[2]
 
 // Load complete type information for the specified packages,
@@ -2465,7 +2465,7 @@ The rest of the program prints the output:
 
 	// go get golang.org/x/example/gotypes/doc
 
-```
+```go
 // Print the object and its methods (incl. location of definition).
 fmt.Println(obj)
 for _, sel := range typeutil.IntuitiveMethodSet(obj.Type(), nil) {
