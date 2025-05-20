@@ -1,0 +1,33 @@
+name: Go CI Pipeline
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./outyet
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Build
+        run: go build -o outyet-app
+
+      - name: Test
+        run: go test ./...
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: outyet-app
+          path: outyet/outyet-app
