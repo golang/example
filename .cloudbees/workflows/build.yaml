@@ -2,9 +2,6 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: build
 on:
-  push:
-    branches:
-      - "**"
   workflow_dispatch:
 jobs:
   go-build:
