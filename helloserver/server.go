@@ -24,6 +24,7 @@ import (
 func usage() {
 	fmt.Fprintf(os.Stderr, "usage: helloserver [options]\n")
 	flag.PrintDefaults()
+	fmt.Fprintf(cica)
 	os.Exit(2)
 }
 
