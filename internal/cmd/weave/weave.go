@@ -9,7 +9,7 @@
 // exceptions:
 //
 // If a line begins with "%toc", it is replaced with a table of contents
-// consisting of links to the top two levels of headers ("#" and "##").
+// consisting of links to the top two levels of headers below the %toc symbol.
 //
 // If a line begins with "%include FILENAME TAG", it is replaced with the lines
 // of the file between lines containing "!+TAG" and  "!-TAG". TAG can be omitted,
@@ -110,7 +110,11 @@ func main() {
 		if line == "%toc" {
 			toc = nil
 			minTocDepth = 0
-		} else if strings.HasPrefix(line, "# ") || strings.HasPrefix(line, "## ") {
+		} else if strings.HasPrefix(line, "# ") ||
+			strings.HasPrefix(line, "## ") ||
+			strings.HasPrefix(line, "### ") ||
+			strings.HasPrefix(line, "#### ") {
+
 			words := strings.Fields(line)
 			depth := len(words[0])
 			if minTocDepth == 0 || depth < minTocDepth {
@@ -140,7 +144,10 @@ func main() {
 		switch {
 		case strings.HasPrefix(line, "%toc"): // ToC
 			for _, h := range toc {
-				printf("%s1. [%s](#%s)\n", strings.Repeat("\t", h.depth-minTocDepth), h.text, h.anchor)
+				// Only print two levels of headings.
+				if h.depth-minTocDepth <= 1 {
+					printf("%s1. [%s](#%s)\n", strings.Repeat("\t", h.depth-minTocDepth), h.text, h.anchor)
+				}
 			}
 		case strings.HasPrefix(line, "%include"):
 			words := strings.Fields(line)
