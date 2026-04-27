@@ -42,3 +42,30 @@ jobs:
 
       - name: Checkout base branch
         run: |
+          git fetch origin
+          git checkout origin/${{ github.base_ref }}
+
+      - name: Run coverage on base branch
+        run: |
+          COV_OUTPUT=$(./scripts/coverage.sh)
+
+          echo "$COV_OUTPUT"
+
+          BASE_COVERAGE=$(echo "$COV_OUTPUT" \
+            | grep "Final coverage:" \
+            | awk '{print $3}' \
+            | sed 's/%//')
+
+          echo "BASE_COVERAGE=$BASE_COVERAGE" >> $GITHUB_ENV
+
+      - name: Compare coverage (PR vs base)
+        run: |
+          echo "PR Coverage   : ${PR_COVERAGE}%"
+          echo "Base Coverage : ${BASE_COVERAGE}%"
+
+          if (( $(echo "${PR_COVERAGE} < ${BASE_COVERAGE}" | bc -l) )); then
+            echo "❌ Coverage reduced from ${BASE_COVERAGE}% → ${PR_COVERAGE}%"
+            exit 1
+          fi
+
+          echo "✅ Coverage not reduced"
