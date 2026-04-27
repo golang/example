@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Running tests and generating raw coverage..."
+echo "Running tests and generating raw coverage......."
 go test ./... -coverprofile=coverage.raw.out
 
 echo "Filtering coverage (excluding generated & entry code)..."
