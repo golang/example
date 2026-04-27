@@ -1,0 +1,55 @@
+name: Test Coverage Quality Gate
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  coverage-gate:
+    name: Go Coverage Gate
+    runs-on: [self-hosted, linux, eks]
+
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Needed to compare with base branch
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run coverage on PR branch
+        run: |
+          chmod +x ./scripts/coverage.sh
+          ./scripts/coverage.sh
+          mv coverage.percent coverage.pr
+
+      - name: Checkout base branch
+        run: |
+          git checkout origin/${{ github.base_ref }}
+
+      - name: Run coverage on base branch
+        run: |
+          ./scripts/coverage.sh
+          mv coverage.percent coverage.base
+
+      - name: Compare coverage (PR vs base)
+        run: |
+          PR_COV=$(cat coverage.pr)
+          BASE_COV=$(cat coverage.base)
+
+          echo "PR Coverage   : $PR_COV%"
+          echo "Base Coverage : $BASE_COV%"
+
+          if (( $(echo "$PR_COV < $BASE_COV" | bc -l) )); then
+            echo "❌ Coverage reduced from $BASE_COV% → $PR_COV%"
+            exit 1
+          fi
+
+          echo "✅ Coverage not reduced"
