@@ -1,0 +1,75 @@
+name: Test Coverage Quality Gate
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  coverage-gate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Install bc
+        run: sudo apt-get update && sudo apt-get install -y bc
+
+      - name: Run coverage on PR branch
+        run: |
+          chmod +x ./scripts/coverage.sh
+          COV_OUTPUT=$(./scripts/coverage.sh)
+
+          echo "$COV_OUTPUT"
+
+          PR_COVERAGE=$(echo "$COV_OUTPUT" \
+            | grep "Final coverage:" \
+            | awk '{print $3}' \
+            | sed 's/%//')
+
+          echo "PR_COVERAGE=$PR_COVERAGE" >> $GITHUB_ENV
+
+      - name: Checkout base branch
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Base branch: ${{ github.base_ref }}"
+          git fetch origin
+          git checkout origin/${{ github.base_ref }}
+
+      - name: Run coverage on base branch
+        if: github.event_name == 'pull_request'
+        run: |
+          COV_OUTPUT=$(./scripts/coverage.sh)
+
+          echo "$COV_OUTPUT"
+
+          BASE_COVERAGE=$(echo "$COV_OUTPUT" \
+            | grep "Final coverage:" \
+            | awk '{print $3}' \
+            | sed 's/%//')
+
+          echo "BASE_COVERAGE=$BASE_COVERAGE" >> $GITHUB_ENV
+
+      - name: Compare coverage (PR vs base)
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "PR Coverage   : ${PR_COVERAGE}%"
+          echo "Base Coverage : ${BASE_COVERAGE}%"
+
+          if (( $(echo "${PR_COVERAGE} < ${BASE_COVERAGE}" | bc -l) )); then
+            echo "❌ Coverage reduced from ${BASE_COVERAGE}% → ${PR_COVERAGE}%"
+            exit 1
+          fi
+
+          echo "✅ Coverage not reduced"
