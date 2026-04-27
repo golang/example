@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   coverage-gate:
-    runs-on: [self-hosted, linux, eks]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout PR code
