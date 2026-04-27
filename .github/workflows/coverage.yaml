@@ -10,14 +10,13 @@ permissions:
 
 jobs:
   coverage-gate:
-    name: Go Coverage Gate
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, eks]
 
     steps:
       - name: Checkout PR code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # Needed to compare with base branch
+          fetch-depth: 0
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -27,28 +26,40 @@ jobs:
       - name: Run coverage on PR branch
         run: |
           chmod +x ./scripts/coverage.sh
-          ./scripts/coverage.sh
-          mv coverage.percent coverage.pr
+          COV_OUTPUT=$(./scripts/coverage.sh)
+
+          echo "$COV_OUTPUT"
+
+          PR_COVERAGE=$(echo "$COV_OUTPUT" \
+            | grep "Final coverage:" \
+            | awk '{print $3}' \
+            | sed 's/%//')
+
+          echo "PR_COVERAGE=$PR_COVERAGE" >> $GITHUB_ENV
 
       - name: Checkout base branch
-        run: |
-          git checkout origin/${{ github.base_ref }}
+        run: git checkout origin/${{ github.base_ref }}
 
       - name: Run coverage on base branch
         run: |
-          ./scripts/coverage.sh
-          mv coverage.percent coverage.base
+          COV_OUTPUT=$(./scripts/coverage.sh)
+
+          echo "$COV_OUTPUT"
+
+          BASE_COVERAGE=$(echo "$COV_OUTPUT" \
+            | grep "Final coverage:" \
+            | awk '{print $3}' \
+            | sed 's/%//')
+
+          echo "BASE_COVERAGE=$BASE_COVERAGE" >> $GITHUB_ENV
 
       - name: Compare coverage (PR vs base)
         run: |
-          PR_COV=$(cat coverage.pr)
-          BASE_COV=$(cat coverage.base)
+          echo "PR Coverage   : ${PR_COVERAGE}%"
+          echo "Base Coverage : ${BASE_COVERAGE}%"
 
-          echo "PR Coverage   : $PR_COV%"
-          echo "Base Coverage : $BASE_COV%"
-
-          if (( $(echo "$PR_COV < $BASE_COV" | bc -l) )); then
-            echo "❌ Coverage reduced from $BASE_COV% → $PR_COV%"
+          if (( $(echo "${PR_COVERAGE} < ${BASE_COVERAGE}" | bc -l) )); then
+            echo "❌ Coverage reduced from ${BASE_COVERAGE}% → ${PR_COVERAGE}%"
             exit 1
           fi
 
