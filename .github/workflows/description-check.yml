@@ -1,0 +1,21 @@
+name: description check
+on:
+  pull_request:
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+  checks: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: lemahq/lema-verify@v1
+        with:
+          api-url: https://lema-api-4wojvodvaq-uc.a.run.app   # STAGE — not api.lema.sh
+          github-token: ${{ github.token }}
+          record-decisions: true
