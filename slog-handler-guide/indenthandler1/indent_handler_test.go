@@ -15,7 +15,7 @@ func Test(t *testing.T) {
 	l := slog.New(New(&buf, nil))
 	l.Info("hello", "a", 1, "b", true, "c", 3.14, slog.Group("g", "h", 1, "i", 2), "d", "NO")
 	got := buf.String()
-	wantre := `time: [-0-9T:.]+Z?
+	wantre := `time: [-0-9T:.]+(Z|[+-][0-9]{2}:[0-9]{2})?
 level: INFO
 source: ".*/indent_handler_test.go:\d+"
 msg: "hello"
