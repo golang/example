@@ -9,7 +9,7 @@ services:
     - '9035'
     - --scheme
     - http
-    image: cr.weaviate.io/semitechnologies/weaviate:1.25.2
+    image: cr.weaviate.io/semitechnologies/weaviate:1.39.13
     ports:
     - 9035:9035
     - 50051:50051
